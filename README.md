@@ -50,7 +50,9 @@ Run the command `dotnet user-secrets init` and this will create a project specif
 
 - macOS/Linux: `~/.microsoft/usersecrets/`
 
-Now that our project secrets container has been made, it is time for us to populate it with secrets. To stash secrets in the project secret container, when we are in the project folder with **cmd/terminal**, we run the command `dotnet user-secrets set "[secret_name]" "[value]"`. An example of saving the TenantId secret would be `dotnet user-secrets set "TenantId" "goatfloater.onmicrosoft.com"`. We can repeat this step for all the secrets listed below.
+Now that our project secrets container has been made, it is time for us to populate it with secrets. To stash secrets in the project secret container, when we are in the project folder with **cmd/terminal**, we run ```
+dotnet user-secrets set "[secret_name]" "[value]"
+```. An example of saving the TenantId secret would be `dotnet user-secrets set "TenantId" "goatfloater.onmicrosoft.com"`. We can repeat this step for all the secrets listed below.
 
 We must be sure to stash the following secrets in our secrets cache (**CASE SENSITIVE**):
 
@@ -70,7 +72,7 @@ This has created a file named `secrets.json` in the project secrets container. F
 
 This project is using [Microsoft's Entity Framework Core platform](https://docs.microsoft.com/en-au/ef/core/cli/dotnet#update-the-tools) to consume local SQLite databases for lightweight/portable data stores.
 
-We must [install the dotnet ef tools](https://docs.microsoft.com/en-au/ef/core/cli/dotnet#install-the-tools) to manage the databases. Using **cmd/terminal** in the project folder, run the command ```dotnet tool install --global dotnet-ef``` and this will eventually tell us that we have sucessfully installed the tools.
+We must [install the dotnet ef tools](https://docs.microsoft.com/en-au/ef/core/cli/dotnet#install-the-tools) to manage the databases. Using **cmd/terminal** in the project folder, run the command `dotnet tool install --global dotnet-ef` and this will eventually tell us that we have sucessfully installed the tools.
 
 Now that the tools are installed, we need to instruct ef to create our databases from the project migrations. Using **cmd/terminal** in the project folder, run the command `dotnet ef database update --context CippLogs` and it will build the project and eventually you should see an output similar to:
 ```
