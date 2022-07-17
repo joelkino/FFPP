@@ -20,9 +20,9 @@ Licensed under the [MIT License](https://choosealicense.com/licenses/mit/) so do
 
 - You have all the required tokens and SAM app info just as if you were creating a CIPP instance eg: TenantId, ApplicationId, ApplicationSecret, RefreshToken and ExchangeRefreshToken.
 
-- You have the .NET 6 SDK installed, and have the dotnet binary defined in your PATH environment variable so that in cmd/terminal you can type `dotnet --version` and it reports a version which is 6.0.302 or greater.
+- You have the [.NET 6 SDK installed](https://dotnet.microsoft.com/en-us/download/dotnet/6.0), and have the dotnet binary defined in your PATH environment variable so that in **cmd/terminal** you can type `dotnet --version` and it reports a version which is 6.0.302 or greater.
 
-- You have an IDE for dotnet core development ([Visual Studio / Visual Studio Code (Free)](https://visualstudio.microsoft.com/)) unless you are hardcore and enjoy coding from the command line (I have seen people do this 😂).
+- You have an IDE for dotnet core development ([Visual Studio / Visual Studio Code (Free)](https://visualstudio.microsoft.com/) + [C# Extension](https://code.visualstudio.com/docs/languages/dotnet)) unless you are hardcore and enjoy coding from the command line (I have seen people do this 😂).
 
 - You have a development environment setup to run the [CIPP](https://github.com/KelvinTegelaar/CIPP) react/swa front end. You can find the instructions to setup a devenv [here](https://cipp.app/docs/dev/settingup/).
 
@@ -34,7 +34,7 @@ Licensed under the [MIT License](https://choosealicense.com/licenses/mit/) so do
 
 If you are on Windows make sure you have [git installed](https://git-scm.com/downloads) first.
 
-On any platform, open cmd/terminal and navigate (`cd`) to where you want to download this project.
+On any platform, open **cmd/terminal** and navigate (`cd`) to where you want to download this project.
 
 Run the command `git clone git@github.com:White-Knight-IT/CIPP-ALT-API.git` and it will download this project into a folder named CIPP-API-ALT.
 
@@ -42,7 +42,7 @@ Run the command `git clone git@github.com:White-Knight-IT/CIPP-ALT-API.git` and 
 
 This project utilises the official dotnet core method of creating secrets for our local devenv, that is using the [user-secrets](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-6.0&tabs=linux) tool. This puts our secrets in a location outside of the repository, so it is impossible for us to accidentally commit local secrets into the project.
 
-Open cmd/terminal and navigate (`cd`) to the folder that contains the project file (CIPP-API-ALT.csproj). If you cloned the repository to your home directory this will be `cd ~/CIPP-API-ALT/CIPP-API-ALT` .
+Open **cmd/terminal** and navigate (`cd`) to the folder that contains the project file (CIPP-API-ALT.csproj). If you cloned the repository to your home directory this will be `cd ~/CIPP-API-ALT/CIPP-API-ALT` .
 
 Run the command `dotnet user-secrets init` and this will create a project specific secrets container identified by a GUID for us at the following locations:
 
@@ -70,13 +70,13 @@ This has created a file named `secrets.json` in the project secrets container. F
 
 This project is using [Microsoft's Entity Framework Core platform](https://docs.microsoft.com/en-au/ef/core/cli/dotnet#update-the-tools) to consume local SQLite databases for lightweight/portable data stores.
 
-We must [install the dotnet ef tools](https://docs.microsoft.com/en-au/ef/core/cli/dotnet#install-the-tools) to manage the databases. Using **cmd/terminal** in the project folder, run the command `dotnet tool install --global dotnet-ef` and this will eventually tell us that we have sucessfully installed the tools.
+We must [install the dotnet ef tools](https://docs.microsoft.com/en-au/ef/core/cli/dotnet#install-the-tools) to manage the databases. Using **cmd/terminal** in the project folder, run the command ```dotnet tool install --global dotnet-ef``` and this will eventually tell us that we have sucessfully installed the tools.
 
 Now that the tools are installed, we need to instruct ef to create our databases from the project migrations. Using **cmd/terminal** in the project folder, run the command `dotnet ef database update --context CippLogs` and it will build the project and eventually you should see an output similar to:
 ```
 Build started...
 Build succeeded.
-Applying migration '20220710174737_InitialCreate_ExcludedTenants'.
+Applying migration '20220710174729_InitialCreate_CippLogs'.
 Done.
 ```
 
