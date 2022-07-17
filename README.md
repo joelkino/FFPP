@@ -86,6 +86,24 @@ Now we repeat this procedure for the remaining databases such as `dotnet ef data
 
 **This process will be automated in production**.
 
+### Setting ports
+
+The ports that the project listens for HTTP/HTTPS requests can both be configured in the `/CIPP-API-ALT/CIPP-API-ALT/Properties/launchSettings.json` file. In this file you will see a configuration profile like so:
+```
+"profiles": {
+  "CIPP_API_ALT": {
+    "commandName": "Project",
+    "dotnetRunMessages": true,
+    "launchBrowser": true,
+    "launchUrl": "swagger",
+    "applicationUrl": "https://localhost:7072;http://localhost:7071",
+    "environmentVariables": {
+      "ASPNETCORE_ENVIRONMENT": "Development"
+    }
+  },
+```
+In the above profile we can see the ports 7072 and 7071 being used for HTTPS and HTTP respectively. Feel free to change these, however using CIPP-API-ALT as a drop-in API replacement for CIPP-API in a dev environment requires using HTTP on port 7071. **DO NOT USE HTTP IN PRODUCTION**.
+
 ### Running the project
 
 Now that we have stashed our secrets and created our databases, we are free to run the project in our IDE. `Open CIPP-API-ALT.sln` in Visual Studio for example, ensure `Debug` is selected top left and **NOT** `Release` (to get the Swagger UI you must run in DEBUG mode), then hit the play `▶️` button.
@@ -95,3 +113,7 @@ Given that this is a web API, it is not expected to have a user interface when i
 ### Swagger UI screenshot example
 
 ![Swagger UI Screenshot 1](/README-IMAGES/Swagger-UI-1.png)
+
+![Swagger UI Screenshot 2](/README-IMAGES/Swagger-UI-2.png)
+
+![Swagger UI Screenshot 3](/README-IMAGES/Swagger-UI-3.png)
