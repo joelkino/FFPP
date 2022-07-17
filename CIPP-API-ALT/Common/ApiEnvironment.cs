@@ -18,7 +18,10 @@ namespace CIPP_API_ALT.Common
         public static readonly string CacheDir = DataDir + "/Cache";
         public static readonly string CachedTenantsFile = WorkingDir + "/Data/Cache/tenants.cache.json";
         public static readonly string LicenseConversionTableFile = WorkingDir + "/Data/ConversionTable.csv";
+        public static readonly string ApiVersionFile = WorkingDir + "/version_latest.txt";
         public static readonly string ApiVersionHeader = "/api";
+        public static readonly string RemoteCippAltApiVersion = "https://raw.githubusercontent.com/White-Knight-IT/CIPP-API-ALT/main/CIPP-API-ALT/version_latest.txt";
+        public static readonly string RemoteCippVersion = "https://raw.githubusercontent.com/KelvinTegelaar/CIPP/master/version_latest.txt";
 
         /// <summary>
         /// This is used to store the secrets that we will retrieve from user-secrets in dev, or a key vault in prod.

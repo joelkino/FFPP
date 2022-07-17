@@ -70,6 +70,7 @@ builder.Configuration["ExchangeRefreshToken"] = Utilities.RandomByteString();
 //var code = await RequestHelper.NewDeviceLogin("a0c73c16-a7e3-4564-9a95-2bdf47383716", "https://outlook.office365.com/.default", true, "", "M365B654613.onmicrosoft.com");
 //await User.GetCippMsolUsers("M365B654613.onmicrosoft.com");
 //var ebay = await CippDashboard.GetHomeData();
+CippDashboard.CheckVersions("2.8.0");
 
 //app.UseHttpsRedirection();
 
@@ -84,6 +85,15 @@ app.MapGet(ApiEnvironment.ApiVersionHeader + "/GetDashboard", async () =>
 .WithName("GetDashboard");
 
 /// <summary>
+/// /api/GetVersion
+/// </summary>
+app.MapGet(ApiEnvironment.ApiVersionHeader + "/GetVersion", async (string LocalVersion) =>
+{
+    return await CippDashboard.CheckVersions(LocalVersion);
+})
+.WithName("GetVersion");
+
+/// <summary>
 /// /api/Heartbeat
 /// </summary>
 app.MapGet(ApiEnvironment.ApiVersionHeader + "/Heartbeat", () =>
@@ -95,7 +105,7 @@ app.MapGet(ApiEnvironment.ApiVersionHeader + "/Heartbeat", () =>
 /// <summary>
 /// /api/ListTenants
 /// </summary>
-app.MapGet(ApiEnvironment.ApiVersionHeader + "/ListTenants", async (HttpRequest request, bool? AllTenantSelector) =>
+app.MapGet(ApiEnvironment.ApiVersionHeader + "/ListTenants", async (bool? AllTenantSelector) =>
 {
     return await Tenant.GetTenants(allTenantSelector: AllTenantSelector ?? false );
 })

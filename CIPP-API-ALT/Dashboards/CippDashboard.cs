@@ -64,6 +64,46 @@ namespace CIPP_API_ALT.Dashboards
             public string Message { get; set; }
         }
 
+        public static async Task<Versions> CheckVersions(string cippVersion)
+        {
+            string rawApiVersion = File.ReadLines(ApiEnvironment.ApiVersionFile).First();
+            Version apiVersion = Version.Parse(rawApiVersion.Split(":")[0]);
+            string displayApiVersion = string.Format("{0}-{1} ({2})", apiVersion, rawApiVersion.Split(":")[1], rawApiVersion.Split(":")[2]);
+
+            HttpRequestMessage requestMessage = new(HttpMethod.Get, ApiEnvironment.RemoteCippAltApiVersion);
+            HttpResponseMessage responseMessage = await RequestHelper.SendHttpRequest(requestMessage);
+
+            string remoteRawApiVersion = await responseMessage.Content.ReadAsStringAsync();
+            Version remoteApiVersion = Version.Parse(remoteRawApiVersion.Split(":")[0]);
+            string displayRemoteApiVersion = string.Format("{0}-{1} ({2})", remoteApiVersion, remoteRawApiVersion.Split(":")[1], remoteRawApiVersion.Split(":")[2]);
+
+            requestMessage = new(HttpMethod.Get, ApiEnvironment.RemoteCippVersion);
+            responseMessage = await RequestHelper.SendHttpRequest(requestMessage);
+
+            Version remoteCippVersion = Version.Parse(await responseMessage.Content.ReadAsStringAsync());
+
+            return new Versions()
+            {
+                LocalCippVersion = cippVersion,
+                RemoteCippVersion = remoteCippVersion.ToString(),
+                LocalCippApiVersion = displayApiVersion,
+                RemoteCippApiVersion = displayRemoteApiVersion,
+                OutOfDateCipp = remoteCippVersion > Version.Parse(cippVersion),
+                OutOfDateCippApi = remoteApiVersion > apiVersion
+
+            };
+        }
+
+        public struct Versions
+        {
+            public string LocalCippVersion { get; set; }
+            public string RemoteCippVersion { get; set; }
+            public string LocalCippApiVersion { get; set; }
+            public string RemoteCippApiVersion { get; set; }
+            public bool OutOfDateCipp { get; set; }
+            public bool OutOfDateCippApi { get; set; }
+        }
+
         #region Private Methods
         // Checks for alert conditions then builds alerts if the conditions are satisfied
         private static List<string> AlertChecks()
