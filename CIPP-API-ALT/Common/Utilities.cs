@@ -56,17 +56,23 @@ namespace CIPP_API_ALT.Common
             }
             catch (Exception ex)
             {
-                CippLogs.LogDb.LogRequest(string.Format("Exception in DeviceId: {0}, Inner Exception: {1}. Will use the string \"SUSPICIOUS!SALAMANDER#666\" to obfuscate our secrets in RAM instead!", ex.Message, ex.InnerException.Message), string.Empty, "Error", "None", "DeviceId");
+                CippLogs.LogDb.LogRequest(string.Format("Exception in DeviceId: {0}, Inner Exception: {1}. " +
+                    "Will use the string \"SUSPICIOUS!SALAMANDER#666\" to obfuscate our secrets in RAM instead!",
+                    ex.Message, ex.InnerException.Message), string.Empty, "Error", "None", "DeviceId");
                 return "SUSPICIOUS!SALAMANDER#666";
             }
         }
 
         /// <summary>
-        /// Encrypts & Decrypts string by XORing with DeviceId using a uniqueName as the IV
+        /// Encrypts & Decrypts string by XORing with DeviceId (unique per device) using a uniqueName as the IV.
+        /// This is basically One Time Pad (OTP) encryption, given that two objects encrypted with the same key
+        /// and IV can be XOR'd together to reveal the decryption key, #### WARNING #### this is not safe to be 
+        /// used for encryption of secrets. The uniqueName is a mitigation if used correctly and truly unique per 
+        /// value encrypted. I am just using it to obfuscate values in RAM, although mileage will be limited.
         /// </summary>
         /// <param name="stringToXor"></param>
         /// <param name="uniqueName"></param>
-        /// <returns></returns>
+        /// <returns>Encrypted/Decrypted string</returns>
         public static string XORString(string stringToXor, string uniqueName)
         {
             try
@@ -78,14 +84,19 @@ namespace CIPP_API_ALT.Common
                 StringBuilder sb = new();
                 for (int i = 0; i < stringToXor.Length; i++)
                 {
-                    sb.Append((char)(stringToXor[i] ^ key[(i % key.Length)]));
+                    sb.Append((char)(stringToXor[i] ^ key[i % key.Length]));
                 }
+
+                // Scrub key & iv from RAM
+                key = RandomByteString(key.Length);
+                iv = Encoding.Unicode.GetBytes(RandomByteString(iv.Length));
 
                 return sb.ToString();
             }
             catch (Exception ex)
             {
-                CippLogs.LogDb.LogRequest(string.Format("Exception in XORString: {0}, Inner Exception: {1}.", ex.Message, ex.InnerException.Message), string.Empty, "Error", "None", "XORString");
+                CippLogs.LogDb.LogRequest(string.Format("Exception in XORString: {0}, Inner Exception: {1}.",
+                    ex.Message, ex.InnerException.Message), string.Empty, "Error", "None", "XORString");
                 return string.Empty;
             }
         }
@@ -175,7 +186,8 @@ namespace CIPP_API_ALT.Common
             }
             catch (Exception ex)
             {
-                await CippLogs.LogDb.LogRequest(string.Format("Exception purging CIPP Cache: {0}, Inner Exception: {1}.", ex.Message, ex.InnerException.Message), string.Empty, "Error", "None", "RemoveCippCache");
+                await CippLogs.LogDb.LogRequest(string.Format("Exception purging CIPP Cache: {0}, Inner Exception: {1}.",
+                    ex.Message, ex.InnerException.Message), string.Empty, "Error", "None", "RemoveCippCache");
                 return false;
             }
 
@@ -187,7 +199,7 @@ namespace CIPP_API_ALT.Common
         /// </summary>
         /// <param name="arg">string to convert to bytes</param>
         /// <returns>byte[] containing decoded bytes</returns>
-        /// <exception cref="System.Exception">Illegal base64url string</exception>
+        /// <exception cref="Exception">Illegal base64url string</exception>
         static byte[] Base64UrlDecode(string arg)
         {
             string s = arg;
@@ -199,8 +211,8 @@ namespace CIPP_API_ALT.Common
                 case 2: s += "=="; break; // Two pad chars
                 case 3: s += "="; break; // One pad char
                 default:
-                    throw new System.Exception(
-             "Illegal base64url string!");
+                    DebugConsoleWrite(string.Format("Illegal base64url string: {0}", arg));
+                    throw new Exception(string.Format("Illegal base64url string: {0}", arg));
             }
             return Convert.FromBase64String(s); // Standard base64 decoder
         }
