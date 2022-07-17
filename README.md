@@ -22,7 +22,7 @@ Licensed under the [MIT License](https://choosealicense.com/licenses/mit/) so do
 
 - You have the [.NET 6 SDK installed](https://dotnet.microsoft.com/en-us/download/dotnet/6.0), and have the dotnet binary defined in your PATH environment variable so that in **cmd/terminal** you can type `dotnet --version` and it reports a version which is 6.0.302 or greater.
 
-- You have an IDE for dotnet core development ([Visual Studio / Visual Studio Code (Free)](https://visualstudio.microsoft.com/) + [C# Extension](https://code.visualstudio.com/docs/languages/dotnet)) unless you are hardcore and enjoy coding from the command line (I have seen people do this 😂).
+- You have an IDE for dotnet core development such as [Visual Studio](https://visualstudio.microsoft.com/) or [Visual Studio Code (Free)](https://visualstudio.microsoft.com/) + [C# Extension](https://code.visualstudio.com/docs/languages/dotnet), unless you are hardcore and enjoy coding from the command line (I have known people who do this for stuff that isn't Python 😂).
 
 - You know how to run a .NET 6 project in "Debug" mode in your IDE (this will allow you to make use of the Swagger UI).
 
@@ -32,7 +32,7 @@ Licensed under the [MIT License](https://choosealicense.com/licenses/mit/) so do
 
 ## Setting up devenv
 
-### Clone Repository
+### Clone the repository
 
 If you are on Windows make sure you have [git installed](https://git-scm.com/downloads) first.
 
@@ -88,8 +88,10 @@ Now we repeat this procedure for the remaining databases such as `dotnet ef data
 
 ### Running the project
 
-Now that we have stashed our secrets and created our databases, we are free to run the project in our IDE. Open CIPP-API-ALT.sln in Visual Studio for example, ensure `Debug` is selected top left and **NOT** `Release`, then hit the play `▶️` button.
+Now that we have stashed our secrets and created our databases, we are free to run the project in our IDE. `Open CIPP-API-ALT.sln` in Visual Studio for example, ensure `Debug` is selected top left and **NOT** `Release` (to get the Swagger UI you must run in DEBUG mode), then hit the play `▶️` button.
 
 Given that this is a web API, it is not expected to have a user interface when it runs in production. For development however, we are utilising the tool [Swagger](https://swagger.io/) which provides both automated documentaion of our API, and a user interface that lets us perform the RESTful API HTTP methods against our API routes from the browser.
 
-Ensure you run the project in "Debug" mode not "Release", and then the Swagger UI will automatically pop up in your browser allowing you to run queries against the API without a dedicated UI.
+### Swagger UI screenshot example
+
+![Swagger UI Screenshot 1](/README-IMAGES/Swagger-UI-1.png)
