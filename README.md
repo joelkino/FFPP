@@ -50,9 +50,7 @@ Run the command `dotnet user-secrets init` and this will create a project specif
 
 - macOS/Linux: `~/.microsoft/usersecrets/`
 
-Now that our project secrets container has been made, it is time for us to populate it with secrets. To stash secrets in the project secret container, when we are in the project folder with **cmd/terminal**, we run ```
-dotnet user-secrets set "[secret_name]" "[value]"
-```. An example of saving the TenantId secret would be `dotnet user-secrets set "TenantId" "goatfloater.onmicrosoft.com"`. We can repeat this step for all the secrets listed below.
+Now that our project secrets container has been made, it is time for us to populate it with secrets. To stash secrets in the project secret container, when we are in the project folder with **cmd/terminal**, we run `dotnet user-secrets set "[secret_name]" "[value]"`. An example of saving the TenantId secret would be `dotnet user-secrets set "TenantId" "goatfloater.onmicrosoft.com"`. We can repeat this step for all the secrets listed below.
 
 We must be sure to stash the following secrets in our secrets cache (**CASE SENSITIVE**):
 
@@ -85,3 +83,11 @@ Done.
 Now we repeat this procedure for the remaining databases such as `dotnet ef database update --context ExcludedTenants`. There is a file in the project folder of this repository named `update_databases.txt`, this will contain all of these commands so you can create all databases as necessary by using all the commands in this file.
 
 **This process will be automated in production**.
+
+### Running the project
+
+Now that we have stashed our secrets and created our databases, we are free to run the project.
+
+Given that this is a web API, it is not expected to have a user interface when it runs in production. For development however, we are utilising the tool [Swagger](https://swagger.io/) which provides both automated documentaion of our API, and a user interface that lets us perform the RESTful API HTTP methods against our API routes from the browser.
+
+Ensure you run the project in "Debug" mode not "Release".
