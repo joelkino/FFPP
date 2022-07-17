@@ -1,6 +1,6 @@
-## This is Proof of Concept (PoC) code not for production use!
+# This is Proof of Concept (PoC) code not for production use!
 
-# Overview
+## Overview
 
 This is a C# ASP.NET Core web API minimal port of the awesome [CIPP-API](https://github.com/KelvinTegelaar/CIPP-API) project which is currently developed in PowerShell, and deployed as an Azure Function app.
 
@@ -8,11 +8,11 @@ The main goal of this project is to speed up CIPP by utilising a web API version
 
 This port is designed/targeted for small Linux devices/servers, however being dotnet core you should be able to run it anywhere (in theory at least).
 
-# Licensing
+## Licensing
 
 Licensed under the [MIT License](https://choosealicense.com/licenses/mit/) so do whatever you want with it, for free, but you get no warranty and it's a case of use at your own risk. The license and contained copyright notice would need to be included with any copies of this repository/software as per MIT licensing requirements.
 
-# Prerequisites for development environment (devenv)
+## Prerequisites for development environment (devenv)
 
 - You have an [SSH key configured in your account on GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) and you can clone repositories using SSH.
 
@@ -26,14 +26,14 @@ Licensed under the [MIT License](https://choosealicense.com/licenses/mit/) so do
 
 - **[Optional]** If you wish to contribute code, it is a good idea to run a devenv of the official [CIPP-API](https://github.com/KelvinTegelaar/CIPP-API) and compare output between APIs to ensure both are matching. If you follow the complete instructions [here](https://cipp.app/docs/dev/settingup/) you will end up with a devenv for both CIPP and CIPP-API which is ideal. Also, it's a nice thing to do to port new functionality back to original CIPP-API if we can do it, to try and maintain feature parity across repositories.
 
-# Setting up development environment (devenv)
+## Setting up development environment (devenv)
 
-## Clone Repository
+### Clone Repository
 
 If you are on Windows make sure you have git installed first. On any platform, open cmd/terminal and navigate (`cd`) to where you want to download this project.
 
 Run the command `git clone git@github.com:White-Knight-IT/CIPP-ALT-API.git`
 
-## Secrets
+### Secrets
 
 We leverage the official dotnet core method of creating secrets for our local devenv, that is using the [user-secrets](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-6.0&tabs=linux) tool.
