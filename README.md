@@ -38,7 +38,7 @@ If you are on Windows make sure you have [git installed](https://git-scm.com/dow
 
 On any platform, open **cmd/terminal** and navigate (`cd`) to where you want to download this project.
 
-Run the command `git clone git@github.com:White-Knight-IT/CIPP-ALT-API.git` and it will download this project into a folder named CIPP-API-ALT.
+Run the command `git clone git@github.com:White-Knight-IT/CIPP-API-ALT.git` and it will download this project into a folder named CIPP-API-ALT.
 
 ### Secrets
 
