@@ -106,7 +106,7 @@ In the above profile we can see the ports 7072 and 7071 being used for HTTPS and
 
 ### Running the project
 
-Now that we have stashed our secrets and created our databases, we are free to run the project in our IDE. `Open CIPP-API-ALT.sln` in Visual Studio for example, ensure `Debug` is selected top left and **NOT** `Release` (to get the Swagger UI you must run in DEBUG mode), then hit the play `▶️` button.
+Now that we have stashed our secrets and created our databases, we are free to run the project in our IDE. Open `/CIPP-API-ALT/CIPP-API-ALT.sln` in Visual Studio for example, ensure `Debug` is selected top left and **NOT** `Release` (to get the Swagger UI you must run in DEBUG mode), then hit the play `▶️` button.
 
 Given that this is a web API, it is not expected to have a user interface when it runs in production. For development however, we are utilising the tool [Swagger](https://swagger.io/) which provides both automated documentaion of our API, and a user interface that lets us perform the RESTful API HTTP methods against our API routes from the browser.
 
