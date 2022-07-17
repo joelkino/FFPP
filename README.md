@@ -26,13 +26,15 @@ Licensed under the [MIT License](https://choosealicense.com/licenses/mit/) so do
 
 - **[Optional]** If you wish to contribute code, it is a good idea to run a devenv of the official [CIPP-API](https://github.com/KelvinTegelaar/CIPP-API) and compare output between APIs to ensure both are matching. If you follow the complete instructions [here](https://cipp.app/docs/dev/settingup/) you will end up with a devenv for both CIPP and CIPP-API which is ideal. Also, it's a nice thing to do to port new functionality back to original CIPP-API if we can do it, to try and maintain feature parity across repositories.
 
-## Setting up development environment (devenv)
+## Setting up devenv
 
 ### Clone Repository
 
-If you are on Windows make sure you have git installed first. On any platform, open cmd/terminal and navigate (`cd`) to where you want to download this project.
+If you are on Windows make sure you have [git installed](https://git-scm.com/downloads) first.
 
-Run the command `git clone git@github.com:White-Knight-IT/CIPP-ALT-API.git`
+On any platform, open cmd/terminal and navigate (`cd`) to where you want to download this project.
+
+Run the command `git clone git@github.com:White-Knight-IT/CIPP-ALT-API.git` and it will download this project into a folder named CIPP-API-ALT.
 
 ### Secrets
 
