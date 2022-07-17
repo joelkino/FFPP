@@ -24,6 +24,8 @@ Licensed under the [MIT License](https://choosealicense.com/licenses/mit/) so do
 
 - You have an IDE for dotnet core development ([Visual Studio / Visual Studio Code (Free)](https://visualstudio.microsoft.com/) + [C# Extension](https://code.visualstudio.com/docs/languages/dotnet)) unless you are hardcore and enjoy coding from the command line (I have seen people do this 😂).
 
+- You know how to run a .NET 6 project in "Debug" mode in your IDE (this will allow you to make use of the Swagger UI).
+
 - You have a development environment setup to run the [CIPP](https://github.com/KelvinTegelaar/CIPP) react/swa front end. You can find the instructions to setup a devenv [here](https://cipp.app/docs/dev/settingup/).
 
 - **[Optional]** If you wish to contribute code, it is a good idea to run a devenv of the official [CIPP-API](https://github.com/KelvinTegelaar/CIPP-API) and compare output between APIs to ensure both are matching. If you follow the complete instructions [here](https://cipp.app/docs/dev/settingup/) you will end up with a devenv for both CIPP and CIPP-API which is ideal. Also, it's a nice thing to do to port new functionality back to original CIPP-API if we can do it, to try and maintain feature parity across repositories.
@@ -86,8 +88,8 @@ Now we repeat this procedure for the remaining databases such as `dotnet ef data
 
 ### Running the project
 
-Now that we have stashed our secrets and created our databases, we are free to run the project.
+Now that we have stashed our secrets and created our databases, we are free to run the project in our IDE. Open CIPP-API-ALT.sln in Visual Studio for example, ensure `Debug` is selected top left and **NOT** `Release`, then hit the play `▶️` button.
 
 Given that this is a web API, it is not expected to have a user interface when it runs in production. For development however, we are utilising the tool [Swagger](https://swagger.io/) which provides both automated documentaion of our API, and a user interface that lets us perform the RESTful API HTTP methods against our API routes from the browser.
 
-Ensure you run the project in "Debug" mode not "Release".
+Ensure you run the project in "Debug" mode not "Release", and then the Swagger UI will automatically pop up in your browser allowing you to run queries against the API without a dedicated UI.

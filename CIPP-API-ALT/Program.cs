@@ -1,4 +1,4 @@
-﻿/// Created by Ian Harris (@knightian) - White Knight IT
+﻿/// Created by Ian Harris (@knightian) - White Knight IT - https://whiteknightit.com.au
 /// 2022-07-05
 /// Licensed under the MIT License
 /// didactic-barnacle is the random name chosen for this project by GitHub
