@@ -3,7 +3,7 @@
 namespace CIPP_API_ALT.Licenses
 {
     /// <summary>
-    /// Clased used to define a M365 License SKU
+    /// Class used to define a M365 License SKU
     /// </summary>
     public class License
     {
