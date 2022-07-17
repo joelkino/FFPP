@@ -14,6 +14,8 @@ namespace CIPP_API_ALT.Common
         #endif
         public static readonly string WorkingDir = Directory.GetCurrentDirectory();
         public static readonly string DataDir = WorkingDir + "/Data";
+        public static readonly string DatabaseDir = DataDir + "/SQLite";
+        public static readonly string CacheDir = DataDir + "/Cache";
         public static readonly string CachedTenantsFile = WorkingDir + "/Data/Cache/tenants.cache.json";
         public static readonly string LicenseConversionTableFile = WorkingDir + "/Data/ConversionTable.csv";
         public static readonly string ApiVersionHeader = "/api";

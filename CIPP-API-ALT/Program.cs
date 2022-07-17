@@ -29,6 +29,8 @@ builder.Services.Configure<JsonOptions>(options =>
 var app = builder.Build();
 DateTime started = DateTime.UtcNow;
 
+Utilities.DataDirectoryBuild();
+
 if (ApiEnvironment.IsDebug)
 {
     Console.WriteLine(String.Format("######################## CIPP-API-ALT is running in DEBUG context! - app.Environment.IsDevelopment():{0}", app.Environment.IsDevelopment().ToString()));

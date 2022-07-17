@@ -301,6 +301,15 @@ namespace CIPP_API_ALT.Common
 
             return false;
         }
+
+        /// <summary>
+        /// Build data directories if they don't exist
+        /// </summary>
+        public static void DataDirectoryBuild()
+        {
+            Directory.CreateDirectory(ApiEnvironment.CacheDir);
+            Directory.CreateDirectory(ApiEnvironment.DatabaseDir);
+        }
     }
 }
 
