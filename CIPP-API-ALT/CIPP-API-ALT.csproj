@@ -18,11 +18,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.7" />
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
     <PackageReference Include="Azure.Identity" Version="1.6.0" />
-    <PackageReference Include="DeviceId" Version="6.2.0" />
-    <PackageReference Include="DeviceId.Windows" Version="6.2.0" />
-    <PackageReference Include="DeviceId.Windows.Wmi" Version="6.2.0" />
-    <PackageReference Include="DeviceId.Linux" Version="6.2.0" />
-    <PackageReference Include="DeviceId.Mac" Version="6.2.0" />
   </ItemGroup>
 
   <ItemGroup>

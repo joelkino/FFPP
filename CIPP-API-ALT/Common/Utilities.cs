@@ -1,9 +1,6 @@
-﻿using System.Security.Cryptography;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using CIPP_API_ALT.Data.Logging;
-using DeviceId;
 
 namespace CIPP_API_ALT.Common
 {
@@ -32,73 +29,6 @@ namespace CIPP_API_ALT.Common
             byte[] randomFillerBytes = new byte[length];
             new Random().NextBytes(randomFillerBytes);
             return Encoding.Unicode.GetString(randomFillerBytes);
-        }
-
-        /// <summary>
-        /// Returns an ID unique to this device
-        /// </summary>
-        /// <returns></returns>
-        public static string DeviceId()
-        {
-            try
-            {
-                return new DeviceIdBuilder().AddMachineName().AddOsVersion()
-                    .OnWindows(windows => windows
-                        .AddProcessorId()
-                        .AddMotherboardSerialNumber()
-                        .AddSystemDriveSerialNumber())
-                    .OnLinux(linux => linux
-                        .AddMotherboardSerialNumber()
-                        .AddSystemDriveSerialNumber())
-                    .OnMac(mac => mac
-                        .AddSystemDriveSerialNumber()
-                        .AddPlatformSerialNumber()).ToString();
-            }
-            catch (Exception ex)
-            {
-                CippLogs.LogDb.LogRequest(string.Format("Exception in DeviceId: {0}, Inner Exception: {1}. " +
-                    "Will use the string \"SUSPICIOUS!SALAMANDER#666\" to obfuscate our secrets in RAM instead!",
-                    ex.Message, ex.InnerException.Message), string.Empty, "Error", "None", "DeviceId");
-                return "SUSPICIOUS!SALAMANDER#666";
-            }
-        }
-
-        /// <summary>
-        /// Encrypts & Decrypts string by XORing with DeviceId (unique per device) using a uniqueName as the IV.
-        /// This is basically One Time Pad (OTP) encryption, given that two objects encrypted with the same key
-        /// and IV can be XOR'd together to reveal the decryption key, #### WARNING #### this is not safe to be 
-        /// used for encryption of secrets. The uniqueName is a mitigation if used correctly and truly unique per 
-        /// value encrypted. I am just using it to obfuscate values in RAM, although mileage will be limited.
-        /// </summary>
-        /// <param name="stringToXor"></param>
-        /// <param name="uniqueName"></param>
-        /// <returns>Encrypted/Decrypted string</returns>
-        public static string XORString(string stringToXor, string uniqueName)
-        {
-            try
-            {
-                byte[] iv = Encoding.Unicode.GetBytes(uniqueName);
-                string key = DeviceId() + uniqueName;
-                key = Encoding.Unicode.GetString(new HMACSHA256(iv).ComputeHash(Encoding.Unicode.GetBytes(key)));
-
-                StringBuilder sb = new();
-                for (int i = 0; i < stringToXor.Length; i++)
-                {
-                    sb.Append((char)(stringToXor[i] ^ key[i % key.Length]));
-                }
-
-                // Scrub key & iv from RAM
-                key = RandomByteString(key.Length);
-                iv = Encoding.Unicode.GetBytes(RandomByteString(iv.Length));
-
-                return sb.ToString();
-            }
-            catch (Exception ex)
-            {
-                CippLogs.LogDb.LogRequest(string.Format("Exception in XORString: {0}, Inner Exception: {1}.",
-                    ex.Message, ex.InnerException.Message), string.Empty, "Error", "None", "XORString");
-                return string.Empty;
-            }
         }
 
         /// <summary>
@@ -186,8 +116,11 @@ namespace CIPP_API_ALT.Common
             }
             catch (Exception ex)
             {
-                await CippLogs.LogDb.LogRequest(string.Format("Exception purging CIPP Cache: {0}, Inner Exception: {1}.",
-                    ex.Message, ex.InnerException.Message), string.Empty, "Error", "None", "RemoveCippCache");
+                using (CippLogs logDb = new())
+                {
+                    await logDb.LogRequest(string.Format("Exception purging CIPP Cache: {0}, Inner Exception: {1}.",
+                        ex.Message, ex.InnerException.Message ?? string.Empty), string.Empty, "Error", "None", "RemoveCippCache");
+                }
                 return false;
             }
 

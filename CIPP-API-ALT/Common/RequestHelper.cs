@@ -106,8 +106,11 @@ namespace CIPP_API_ALT.Common
 					return new Dictionary<string, string> { ["Authorization"] = headers.GetValueOrDefault("access_token", string.Empty) };
 				}
 
-				// Write to log an error that we didn't get HTTP 2XX
-				await CippLogs.LogDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}.", responseMessage.StatusCode.ToString()), string.Empty, "Error", tenantId, "GetGraphToken");
+				using (CippLogs logDb = new())
+				{
+					// Write to log an error that we didn't get HTTP 2XX
+					await logDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}.", responseMessage.StatusCode.ToString()), string.Empty, "Error", tenantId, "GetGraphToken");
+				}
 				return new Dictionary<string, string> { [string.Empty] = string.Empty };
 			}
 		}
@@ -192,8 +195,12 @@ namespace CIPP_API_ALT.Common
 							}
 							else
 							{
-								// Write to log an error that we didn't get HTTP 2XX
-								await CippLogs.LogDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}", responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewGraphGetRequest");
+                                using (CippLogs logDb = new())
+								{
+									// Write to log an error that we didn't get HTTP 2XX
+									await logDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}",
+										responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewGraphGetRequest");
+								}
 							}
 
 						}
@@ -209,7 +216,10 @@ namespace CIPP_API_ALT.Common
 			}
 			else
 			{
-				await CippLogs.LogDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope", string.Empty, "Info", tenantId, "NewGraphGetRequest");
+				using (CippLogs logDb = new())
+				{
+					await logDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope", string.Empty, "Info", tenantId, "NewGraphGetRequest");
+				}
 			}
 
 			return data;
@@ -259,8 +269,12 @@ namespace CIPP_API_ALT.Common
 							return jsonDoc.RootElement;
 						}
 
-						// Write to log an error that we didn't get HTTP 2XX
-						await CippLogs.LogDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}", responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewGraphPostRequest");
+                        using (CippLogs logDb = new())
+						{
+							// Write to log an error that we didn't get HTTP 2XX
+							await logDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}",
+								responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewGraphPostRequest");
+						}
 					}
 				}
 				catch (Exception ex)
@@ -272,7 +286,11 @@ namespace CIPP_API_ALT.Common
 			}
 			else
 			{
-				await CippLogs.LogDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope", string.Empty, "Info", tenantId, "NewGraphPostRequest");
+				using (CippLogs logDb = new())
+				{
+					await logDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope",
+						string.Empty, "Info", tenantId, "NewGraphPostRequest");
+				}
 			}
 
 			return new JsonElement();
@@ -301,9 +319,12 @@ namespace CIPP_API_ALT.Common
 				return jsonDoc.RootElement;
 			}
 
-			await CippLogs.LogDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}.", responseMessage.StatusCode.ToString()), string.Empty, "Error", tenantId, "GetClassicApiToken");
-			return new();
+			using (CippLogs logDb = new())
+			{
+				await logDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}.", responseMessage.StatusCode.ToString()), string.Empty, "Error", tenantId, "GetClassicApiToken");
+			}
 
+			return new();
 		}
 
 		/// <summary>
@@ -391,15 +412,21 @@ namespace CIPP_API_ALT.Common
 							}
 							else
 							{
-								// Write to log an error that we didn't get HTTP 2XX
-								await CippLogs.LogDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}", responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewClassicApiGetRequest");
+								using (CippLogs logDb = new())
+								{
+									// Write to log an error that we didn't get HTTP 2XX
+									await logDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}",
+										responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewClassicApiGetRequest");
+								}
+
 								nextUrl = string.Empty;
 							}
 						}
 					}
 					catch (Exception ex)
 					{
-						Console.WriteLine(string.Format("Exception in NewClassicAPIGetRequest: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message));
+						Console.WriteLine(string.Format("Exception in NewClassicAPIGetRequest: {0}, Inner Exception: {1}",
+							ex.Message, ex.InnerException.Message ?? string.Empty));
 						throw;
 					}
 				}
@@ -407,7 +434,11 @@ namespace CIPP_API_ALT.Common
 			}
 			else
 			{
-				await CippLogs.LogDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope", string.Empty, "Info", tenantId, "NewClassicApiGetRequest");
+				using (CippLogs logDb = new())
+				{
+					await logDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope",
+						string.Empty, "Info", tenantId, "NewClassicApiGetRequest");
+				}
 			}
 
 			return data;
@@ -467,8 +498,12 @@ namespace CIPP_API_ALT.Common
 						}
 						else
 						{
-							// Write to log an error that we didn't get HTTP 2XX
-							await CippLogs.LogDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}", responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewClassicApiPostRequest");
+							using (CippLogs logDb = new())
+							{
+								// Write to log an error that we didn't get HTTP 2XX
+								await logDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}",
+									responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewClassicApiPostRequest");
+							}
 						}
 					}
 				}
@@ -480,7 +515,10 @@ namespace CIPP_API_ALT.Common
 			}
 			else
 			{
-				await CippLogs.LogDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope", string.Empty, "Info", tenantId, "NewClassicApiPostRequest");
+				using (CippLogs logDb = new())
+				{
+					await logDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope", string.Empty, "Info", tenantId, "NewClassicApiPostRequest");
+				}
 			}
 
 			return data;
@@ -519,18 +557,26 @@ namespace CIPP_API_ALT.Common
 						returnData = jsonDoc.RootElement.GetProperty("value");
 					}
 
-					// Write to log an error that we didn't get HTTP 2XX
-					await CippLogs.LogDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}", responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewExoRequest");
+					using (CippLogs logDb = new())
+					{
+						// Write to log an error that we didn't get HTTP 2XX
+						await logDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}",
+							responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewExoRequest");
+					}
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine(string.Format("Exception in NewExoRequest: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message));
+					Console.WriteLine(string.Format("Exception in NewExoRequest: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message ?? string.Empty));
 					throw;
 				}
 			}
 			else
 			{
-				await CippLogs.LogDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope", string.Empty, "Info", tenantId, "NewExoRequest");
+				using (CippLogs logDb = new())
+				{
+					await logDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope",
+						string.Empty, "Info", tenantId, "NewExoRequest");
+				}
 			}
 
 			return returnData;
@@ -571,8 +617,12 @@ namespace CIPP_API_ALT.Common
 
 				if (!responseMessage.IsSuccessStatusCode)
                 {
-					// Write to log an error that we didn't get HTTP 2XX
-					await CippLogs.LogDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}", responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewDeviceLogin");
+					using (CippLogs logDb = new())
+					{
+						// Write to log an error that we didn't get HTTP 2XX
+						await logDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}",
+							responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewDeviceLogin");
+					}
 				}
 			}
 			else

@@ -43,20 +43,24 @@ namespace CIPP_API_ALT.Tenants
 					listTenants.Add(new Tenant("AllTenants", "*All Tenants", "AllTenants"));
                 }
 
-				foreach (Tenant t in tenantArray)
+                using ExcludedTenants excludedTenantsDb = new();
 				{
-					allTenants.Add(t);
-
-					// If we want to exclude from ExcludedTenants from outTenants and it is in ExcludedTenants
-					if (exclude && ExcludedTenants.ExcludedTenantsDb.IsExcluded(t.DefaultDomainName))
+					foreach (Tenant t in tenantArray)
 					{
-						// We exclude
-						continue;
-					}
+						allTenants.Add(t);
 
-					listTenants.Add(t);
+
+						// If we want to exclude from ExcludedTenants from outTenants and it is in ExcludedTenants
+						if (exclude && excludedTenantsDb.IsExcluded(t.DefaultDomainName))
+						{
+							// We exclude
+							continue;
+						}
+
+						listTenants.Add(t);
+					}
 				}
-			}
+            }
 
 			if(cacheFile.Exists && cacheFile.LastWriteTimeUtc >= DateTime.UtcNow.AddMinutes(-7))
             {

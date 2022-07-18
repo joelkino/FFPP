@@ -11,19 +11,12 @@ namespace CIPP_API_ALT.Data.Logging
     /// </summary>
     public class CippLogs : DbContext
     {
-        public static readonly CippLogs LogDb = new();
         public string DbPath { get; }
         private DbSet<LogEntry>? _logEntries { get; set; }
 
         public CippLogs()
         {
             DbPath = ApiEnvironment.DataDir+"/SQLite/CippLogs.db";
-
-            //Create folder for DB if it doesn't exist
-            if(!Directory.Exists(ApiEnvironment.DataDir + "/SQLite"))
-            {
-                Directory.CreateDirectory(ApiEnvironment.DataDir + "/SQLite");
-            }
         }
 
         #region Public Methods

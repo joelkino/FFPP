@@ -10,19 +10,12 @@ namespace CIPP_API_ALT.Data
     /// </summary>
     public class ExcludedTenants : DbContext
     {
-        public static readonly ExcludedTenants ExcludedTenantsDb = new();
         public string DbPath { get; }
         private DbSet<ExcludedTenant>? _excludedTenantEntries { get; set; }
 
         public ExcludedTenants()
         {
-            DbPath = ApiEnvironment.DataDir + "/SQLite/ExcludedTenants.db";
-
-            // Create folder for DB if it doesn't exist
-            if (!Directory.Exists(ApiEnvironment.DataDir + "/SQLite"))
-            {
-                Directory.CreateDirectory(ApiEnvironment.DataDir + "/SQLite");
-            }
+            DbPath = ApiEnvironment.DatabaseDir + "/ExcludedTenants.db";
         }
 
         #region Public Methods

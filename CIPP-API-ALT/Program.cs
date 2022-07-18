@@ -55,15 +55,8 @@ else {
     // Todo Key vault stuff for prod
 }
 
-//Scrub secrets in config from RAM now they are stored encrypted in Secrets
-builder.Configuration["ApplicationId"] = Utilities.RandomByteString();
-builder.Configuration["ApplicationSecret"] = Utilities.RandomByteString();
-builder.Configuration["TenantId"] = Utilities.RandomByteString();
-builder.Configuration["RefreshToken"] = Utilities.RandomByteString();
-builder.Configuration["ExchangeRefreshToken"] = Utilities.RandomByteString();
-
 //string pname = License.ConvertSkuName("SPE_E3_RPA1", string.Empty);
-//await CippLogs.LogDb.LogRequest("Test Message", "", "Information", "M365B654613.onmicrosoft.com", "ThisIsATest");
+//await new CippLogs().LogDb.LogRequest("Test Message", "", "Information", "M365B654613.onmicrosoft.com", "ThisIsATest");
 //List<Tenant> tenants = await Tenant.GetTenants();
 //await RequestHelper.NewTeamsApiGetRequest("https://api.interfaces.records.teams.microsoft.com/Skype.TelephoneNumberMgmt/Tenants/b439f90e-eb4a-40f3-b11a-d793c488b38a/telephone-numbers?locale=en-US", "b439f90e-eb4a-40f3-b11a-d793c488b38a", HttpMethod.Get);
 //await RequestHelper.GetClassicApiToken("M365B654613.onmicrosoft.com", "https://outlook.office365.com");

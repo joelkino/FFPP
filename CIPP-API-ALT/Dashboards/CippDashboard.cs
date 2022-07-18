@@ -19,9 +19,12 @@ namespace CIPP_API_ALT.Dashboards
         {
             List<DashLogEntry> last10Logs = new();
 
-            foreach (CippLogs.LogEntry log in CippLogs.LogDb.Top10LogEntries())
+            using (CippLogs logDb = new())
             {
-                last10Logs.Add(new DashLogEntry() { Tenant = log.Tenant, Message = log.Message });
+                foreach (CippLogs.LogEntry log in logDb.Top10LogEntries())
+                {
+                    last10Logs.Add(new DashLogEntry() { Tenant = log.Tenant ?? string.Empty, Message = log.Message ?? string.Empty });
+                }
             }
 
             return new DashStats()
@@ -64,6 +67,11 @@ namespace CIPP_API_ALT.Dashboards
             public string Message { get; set; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cippVersion"></param>
+        /// <returns></returns>
         public static async Task<Versions> CheckVersions(string cippVersion)
         {
             string rawApiVersion = File.ReadLines(ApiEnvironment.ApiVersionFile).First();
@@ -84,24 +92,23 @@ namespace CIPP_API_ALT.Dashboards
 
             return new Versions()
             {
-                LocalCippVersion = cippVersion,
-                RemoteCippVersion = remoteCippVersion.ToString(),
-                LocalCippApiVersion = displayApiVersion,
-                RemoteCippApiVersion = displayRemoteApiVersion,
-                OutOfDateCipp = remoteCippVersion > Version.Parse(cippVersion),
-                OutOfDateCippApi = remoteApiVersion > apiVersion
-
+                LocalCIPPVersion = cippVersion,
+                RemoteCIPPVersion = remoteCippVersion.ToString(),
+                LocalCIPPAPIVersion = displayApiVersion,
+                RemoteCIPPAPIVersion = displayRemoteApiVersion,
+                OutOfDateCIPP = remoteCippVersion > Version.Parse(cippVersion),
+                OutOfDateCIPPAPI = remoteApiVersion > apiVersion
             };
         }
 
         public struct Versions
         {
-            public string LocalCippVersion { get; set; }
-            public string RemoteCippVersion { get; set; }
-            public string LocalCippApiVersion { get; set; }
-            public string RemoteCippApiVersion { get; set; }
-            public bool OutOfDateCipp { get; set; }
-            public bool OutOfDateCippApi { get; set; }
+            public string LocalCIPPVersion { get; set; }
+            public string RemoteCIPPVersion { get; set; }
+            public string LocalCIPPAPIVersion { get; set; }
+            public string RemoteCIPPAPIVersion { get; set; }
+            public bool OutOfDateCIPP { get; set; }
+            public bool OutOfDateCIPPAPI { get; set; }
         }
 
         #region Private Methods
@@ -117,11 +124,12 @@ namespace CIPP_API_ALT.Dashboards
             }
 
             // Fake alerts, uncomment when you want to test
-            alerts.Add("Fictitious alert! Don't tell Scotty, Scotty doesn't know, Scotty doesn't knowohoh!");
-            alerts.Add("Too old to live, too young to dieieie!");
-            alerts.Add("Who lives in a pineapple under the sea? Absorbant and yellow and porous is he! If nautical nonsense is " +
-                "something you wish, get down on the deck and flop like a fish! Sponge bob square pants, sponge bob square pants" +
-                "spooooonge booooob..... squaaare paaaaaaantsssss");
+
+            //alerts.Add("Fictitious alert! Don't tell Scotty, Scotty doesn't know, Scotty doesn't knowohoh!");
+            //alerts.Add("Too old to live, too young to dieieie!");
+            //alerts.Add("Who lives in a pineapple under the sea? Absorbant and yellow and porous is he! If nautical nonsense is " +
+            //    "something you wish, get down on the deck and flop like a fish! Sponge bob square pants, sponge bob square pants" +
+            //    "spooooonge booooob..... squaaare paaaaaaantsssss");
 
             return alerts;
         }
