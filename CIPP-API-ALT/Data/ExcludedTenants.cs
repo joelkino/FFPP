@@ -46,7 +46,7 @@ namespace CIPP_API_ALT.Data
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception writing  in CippLogs: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message);
+                Console.WriteLine("Exception writing  in CippLogs: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message ?? string.Empty);
                 throw;
             }
         }
@@ -57,7 +57,7 @@ namespace CIPP_API_ALT.Data
         /// <returns>List of ExcludedTenant objects</returns>
         public List<ExcludedTenant> GetExcludedTenants()
         {
-            return _excludedTenantEntries.ToList();
+           return _excludedTenantEntries.ToList() ?? new();
         }
 
         /// <summary>

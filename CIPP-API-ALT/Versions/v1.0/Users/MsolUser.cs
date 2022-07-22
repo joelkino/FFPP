@@ -2,22 +2,22 @@
 using System.Web;
 using System.Xml;
 using System.Xml.Serialization;
-using CIPP_API_ALT.Tenants;
+using CIPP_API_ALT.v10.Tenants;
 using CIPP_API_ALT.Common;
 
-namespace CIPP_API_ALT.Users
+namespace CIPP_API_ALT.v10.Users
 {
     [XmlRoot("User", Namespace = "http://schemas.datacontract.org/2004/07/Microsoft.Online.Administration")]
-    public class User
+    public class MsolUser
     {
         /// <summary>
         /// Gets a list of all the users in the tenant
         /// </summary>
         /// <param name="tenant">Tenant default domain name</param>
         /// <returns>All users in the supplied tenant default domain name</returns>
-        public static async Task<List<User>> GetCippMsolUsers(string tenant)
+        public static async Task<List<MsolUser>> GetCippMsolUsers(string tenant)
         {
-            List<User> users = new();
+            List<MsolUser> users = new();
             Dictionary<string, string> aadGraphToken = await RequestHelper.GetGraphToken("", false, scope: "https://graph.windows.net/.default");
             string tenantId = await Tenant.GetClientIdFromDefaultDomain(tenant);
             string trackingGuid = Guid.NewGuid().ToString();
@@ -90,11 +90,11 @@ namespace CIPP_API_ALT.Users
                     HttpResponseMessage responseMessage = await RequestHelper.SendHttpRequest(requestMessage);
                     XmlDocument xmlDoc = new();
                     xmlDoc.Load(await responseMessage.Content.ReadAsStreamAsync());
-                    XmlSerializer reader = new(typeof(User));
+                    XmlSerializer reader = new(typeof(MsolUser));
 
                     foreach (XmlNode u in xmlDoc.GetElementsByTagName("c:User"))
                     {
-                        User userToAdd = (User)reader.Deserialize(new MemoryStream(System.Text.Encoding.Unicode.GetBytes(u.OuterXml)));
+                        MsolUser userToAdd = (MsolUser)reader.Deserialize(new MemoryStream(System.Text.Encoding.Unicode.GetBytes(u.OuterXml)));
 
                         if (userToAdd != null)
                         {
@@ -134,8 +134,8 @@ namespace CIPP_API_ALT.Users
         }
 
         #region Properties
-        public string[]? AlternateEmailAddresses { get; set; }
-        public string[]? AlternateMobilePhones { get; set; }
+        public object? AlternateEmailAddresses { get; set; }
+        public object? AlternateMobilePhones { get; set; }
         public string? AlternativeSecurityIds { get; set; }
         public bool? BlockCredential { get; set; }
         public string? City { get; set; }

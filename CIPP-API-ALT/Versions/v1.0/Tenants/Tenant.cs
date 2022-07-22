@@ -2,15 +2,15 @@
 using CIPP_API_ALT.Common;
 using CIPP_API_ALT.Data;
 
-namespace CIPP_API_ALT.Tenants
+namespace CIPP_API_ALT.v10.Tenants
 {
     public class Tenant
     {
         public Tenant(string customerId, string displayName, string defaultDomainName)
         {
-			CustomerId = customerId;
-			DefaultDomainName = defaultDomainName;
-			DisplayName = displayName;
+			this.customerId = customerId;
+			this.defaultDomainName = defaultDomainName;
+			this.displayName = displayName;
         }
 
 		/// <summary>
@@ -20,7 +20,7 @@ namespace CIPP_API_ALT.Tenants
         /// <returns>ClientId</returns>
 		public async static Task<string> GetClientIdFromDefaultDomain(string defaultDomain)
         {
-			return (await GetTenants(false)).Find(x => x.DefaultDomainName.Equals(defaultDomain)).CustomerId;
+			return (await GetTenants(false)).Find(x => x.defaultDomainName.Equals(defaultDomain)).customerId ?? string.Empty;
         }
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace CIPP_API_ALT.Tenants
 
 
 						// If we want to exclude from ExcludedTenants from outTenants and it is in ExcludedTenants
-						if (exclude && excludedTenantsDb.IsExcluded(t.DefaultDomainName))
+						if (exclude && excludedTenantsDb.IsExcluded(t.defaultDomainName))
 						{
 							// We exclude
 							continue;
@@ -85,9 +85,9 @@ namespace CIPP_API_ALT.Tenants
 			return outTenants;
 		}
 
-		public string CustomerId { get; set; }
-		public string DefaultDomainName { get; set; }
-		public string DisplayName { get; set; }
+		public string customerId { get; set; }
+		public string defaultDomainName { get; set; }
+		public string displayName { get; set; }
 	}
 }
 

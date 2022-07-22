@@ -1,6 +1,6 @@
 ﻿using CIPP_API_ALT.Common;
 
-namespace CIPP_API_ALT.Licenses
+namespace CIPP_API_ALT.v10.Licenses
 {
     /// <summary>
     /// Class used to define a M365 License SKU
@@ -14,6 +14,7 @@ namespace CIPP_API_ALT.Licenses
         static License()
         {
             Licenses = Utilities.CsvToObjectList<License>(ApiEnvironment.LicenseConversionTableFile);
+            Licenses.AddRange(Utilities.CsvToObjectList<License>(ApiEnvironment.LicenseConversionTableMisfitsFile));
         }
 
         // Constructor builds a new license representing M365 License SKU
@@ -25,6 +26,17 @@ namespace CIPP_API_ALT.Licenses
             ServicePlanName = servicePlanName;
             ServicePlanId = servicePlanId;
             ServicePlansIncludedFriendlyNames = servicePlansIncludedFriendlyNames;
+        }
+
+        // Constructor builds a new license representing M365 License SKU from the extra misfits file
+        public License(string productDisplayName, string guid)
+        {
+            ProductDisplayName = productDisplayName;
+            StringId = string.Empty;
+            Guid = guid;
+            ServicePlanName = string.Empty;
+            ServicePlanId = string.Empty;
+            ServicePlansIncludedFriendlyNames = string.Empty;
         }
 
         /// <summary>
@@ -68,11 +80,11 @@ namespace CIPP_API_ALT.Licenses
         }
 
         public string ProductDisplayName {  get; set;  }
-        public string StringId { get; set; }
+        public string? StringId { get; set; }
         public string Guid { get; set; }
-        public string ServicePlanName { get; set; }
-        public string ServicePlanId { get; set; }
-        public string ServicePlansIncludedFriendlyNames { get; set; }
+        public string? ServicePlanName { get; set; }
+        public string? ServicePlanId { get; set; }
+        public string? ServicePlansIncludedFriendlyNames { get; set; }
     }
 }
 

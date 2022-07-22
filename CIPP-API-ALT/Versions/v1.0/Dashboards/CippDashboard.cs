@@ -1,8 +1,8 @@
 ﻿using CIPP_API_ALT.Data.Logging;
-using CIPP_API_ALT.Tenants;
+using CIPP_API_ALT.v10.Tenants;
 using CIPP_API_ALT.Common;
 
-namespace CIPP_API_ALT.Dashboards
+namespace CIPP_API_ALT.v10.Dashboards
 {
     public class CippDashboard
     {
@@ -31,9 +31,9 @@ namespace CIPP_API_ALT.Dashboards
             {
                 NextStandardsRun = DateTime.UtcNow.AddHours(3).ToString("yyyy-MM-ddThh:mm:ss"),
                 NextBPARun = DateTime.UtcNow.AddHours(3).ToString("yyyy-MM-ddThh:mm:ss"),
-                QueuedApps = 0,
-                QueuedStandards = 0,
-                TenantCount = (await Tenant.GetTenants(allTenantSelector: false)).Count,
+                queuedApps = 0,
+                queuedStandards = 0,
+                tenantCount = (await Tenant.GetTenants(allTenantSelector: false)).Count,
                 RefreshTokenDate = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-dd"),
                 ExchangeTokenDate = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-dd"),
                 LastLog = last10Logs,
@@ -49,9 +49,9 @@ namespace CIPP_API_ALT.Dashboards
             public string NextStandardsRun { get; set; }
             public string NextBPARun { get; set; }
             public string NextDomainsRun { get; set; }
-            public int QueuedApps { get; set; }
-            public int QueuedStandards { get; set; }
-            public int TenantCount { get; set; }
+            public int queuedApps { get; set; }
+            public int queuedStandards { get; set; }
+            public int tenantCount { get; set; }
             public string RefreshTokenDate { get; set; }
             public string ExchangeTokenDate { get; set; }
             public List<DashLogEntry> LastLog { get; set; }
@@ -74,16 +74,12 @@ namespace CIPP_API_ALT.Dashboards
         /// <returns></returns>
         public static async Task<Versions> CheckVersions(string cippVersion)
         {
-            string rawApiVersion = File.ReadLines(ApiEnvironment.ApiVersionFile).First();
-            Version apiVersion = Version.Parse(rawApiVersion.Split(":")[0]);
-            string displayApiVersion = string.Format("{0}-{1} ({2})", apiVersion, rawApiVersion.Split(":")[1], rawApiVersion.Split(":")[2]);
+            ApiEnvironment.CippVersion cippApiVersion = ApiEnvironment.GetApiVersion();
 
             HttpRequestMessage requestMessage = new(HttpMethod.Get, ApiEnvironment.RemoteCippAltApiVersion);
             HttpResponseMessage responseMessage = await RequestHelper.SendHttpRequest(requestMessage);
 
-            string remoteRawApiVersion = await responseMessage.Content.ReadAsStringAsync();
-            Version remoteApiVersion = Version.Parse(remoteRawApiVersion.Split(":")[0]);
-            string displayRemoteApiVersion = string.Format("{0}-{1} ({2})", remoteApiVersion, remoteRawApiVersion.Split(":")[1], remoteRawApiVersion.Split(":")[2]);
+            ApiEnvironment.CippVersion remoteApiVersion = new(await responseMessage.Content.ReadAsStringAsync());
 
             requestMessage = new(HttpMethod.Get, ApiEnvironment.RemoteCippVersion);
             responseMessage = await RequestHelper.SendHttpRequest(requestMessage);
@@ -94,10 +90,10 @@ namespace CIPP_API_ALT.Dashboards
             {
                 LocalCIPPVersion = cippVersion,
                 RemoteCIPPVersion = remoteCippVersion.ToString(),
-                LocalCIPPAPIVersion = displayApiVersion,
-                RemoteCIPPAPIVersion = displayRemoteApiVersion,
+                LocalCIPPAPIVersion = cippApiVersion.DisplayVersion,
+                RemoteCIPPAPIVersion = remoteApiVersion.DisplayVersion,
                 OutOfDateCIPP = remoteCippVersion > Version.Parse(cippVersion),
-                OutOfDateCIPPAPI = remoteApiVersion > apiVersion
+                OutOfDateCIPPAPI = remoteApiVersion.Version > cippApiVersion.Version
             };
         }
 
@@ -125,11 +121,11 @@ namespace CIPP_API_ALT.Dashboards
 
             // Fake alerts, uncomment when you want to test
 
-            //alerts.Add("Fictitious alert! Don't tell Scotty, Scotty doesn't know, Scotty doesn't knowohoh!");
-            //alerts.Add("Too old to live, too young to dieieie!");
-            //alerts.Add("Who lives in a pineapple under the sea? Absorbant and yellow and porous is he! If nautical nonsense is " +
-            //    "something you wish, get down on the deck and flop like a fish! Sponge bob square pants, sponge bob square pants" +
-            //    "spooooonge booooob..... squaaare paaaaaaantsssss");
+            alerts.Add("I can't beleive it's not butter!");
+            alerts.Add("I really can't beleive it's not butter!");
+            alerts.Add("I still can't beleive it's not butter!");
+            alerts.Add("Ok, it's not butter.");
+            alerts.Add("It is a fact that Kelvin hates camels.");
 
             return alerts;
         }

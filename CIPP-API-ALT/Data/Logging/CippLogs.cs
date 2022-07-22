@@ -39,7 +39,7 @@ namespace CIPP_API_ALT.Data.Logging
                 {
                     // Decoding user from the x-ms-s-client-principal header value passed in
                     JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(Convert.FromBase64String(user)));
-                    username = jsonDoc.RootElement.EnumerateObject().FirstOrDefault(p => p.Name == "userDetails").ToString();
+                    username = jsonDoc.RootElement.EnumerateObject().FirstOrDefault(p => p.Name == "userDetails").Value.ToString();
                 }
 
                 if (string.IsNullOrEmpty(username))
@@ -73,7 +73,7 @@ namespace CIPP_API_ALT.Data.Logging
         /// <returns>10 most recent CippLog entries</returns>
         public List<LogEntry> Top10LogEntries()
         {
-            return _logEntries.OrderByDescending(x => x.Timestamp).Take(10).ToList();
+            return _logEntries.OrderByDescending(x => x.Timestamp).Take(10).ToList() ?? new();
         }
         #endregion
 

@@ -6,17 +6,25 @@ namespace CIPP_API_ALT.Common
 {
     public static class Utilities
     {
+        public static readonly List<string> WordDictionary = new() { "bruce", "bruceson", "john", "johnson", "big", "small",
+            "stinky", "outrageous", "valuable", "pineapple", "jack", "jackson", "peter", "file", "juices", "spruce", "cactus",
+            "blunt", "sharp", "affluent", "camel", "toe", "elbow", "knee", "old", "sponzengeiger", "wallace", "william", "jane",
+            "doe", "moe", "didactic", "barnacle", "sponge", "bob", "qwerty", "nelson", "full", "extreme", "poptart", "fbi", "nsa"};
+
         /// <summary>
         /// Defines a Heartbeat object we return when the /api/Heartbeat API is polled
         /// </summary>
         public class Heartbeat
         {
-            public Heartbeat(DateTime started)
-            {
-                Started = started;
-            }
+            public DateTime started { get => ApiEnvironment.Started; }
+        }
 
-            public DateTime Started { get; set; }
+        /// <summary>
+        /// Defines a Heartbeat object we return when the /api/Heartbeat API is polled
+        /// </summary>
+        public class CurrentApiRoute
+        {
+            public string api { get => ApiEnvironment.ApiRouteVersions[^1].ToString(); }
         }
 
         /// <summary>
@@ -202,16 +210,16 @@ namespace CIPP_API_ALT.Common
 
             if (jsonToken.TryGetProperty("app_displayname", out JsonElement appNameJson))
             {
-                appName = appNameJson.GetString();
+                appName = appNameJson.GetString() ?? string.Empty;
             }
 
             if (jsonToken.TryGetProperty("upn", out JsonElement upnJson))
             {
-                upn = upnJson.GetString();
+                upn = upnJson.GetString() ?? string.Empty;
             }
             else if(jsonToken.TryGetProperty("unique_name", out upnJson))
             {
-                upn = upnJson.GetString();   
+                upn = upnJson.GetString() ?? string.Empty;   
             }
 
             return new(jsonToken.GetProperty("appid").ToString(), appName,
@@ -242,6 +250,21 @@ namespace CIPP_API_ALT.Common
         {
             Directory.CreateDirectory(ApiEnvironment.CacheDir);
             Directory.CreateDirectory(ApiEnvironment.DatabaseDir);
+        }
+
+        /// <summary>
+        /// Generates 2 random words from WordDictionary seperated by a - character
+        /// </summary>
+        /// <returns>2 random words from WordDictionary seperated by a - character</returns>
+        public static string Random2Words()
+        {
+            string RandomWord()
+            {
+                return WordDictionary[(int)new Random((int)(DateTime.Now.Ticks / 7)).NextInt64(0, WordDictionary.Count())];
+            }
+
+            return string.Format("{0}-{1}", RandomWord(), RandomWord());
+            
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Web;
 using System.Text.Json;
-using CIPP_API_ALT.Tenants;
+using CIPP_API_ALT.v10.Tenants;
 using CIPP_API_ALT.Data.Logging;
 
 namespace CIPP_API_ALT.Common
@@ -537,7 +537,7 @@ namespace CIPP_API_ALT.Common
 
 			if (await GetAuthorisedRequest(tenantId))
 			{
-				string tenant = (await Tenant.GetTenants()).Find(x => x.DefaultDomainName.Equals(tenantId)).CustomerId;
+				string tenant = (await Tenant.GetTenants()).Find(x => x.defaultDomainName.Equals(tenantId)).customerId ?? string.Empty;
 				string onMicrosoft = (await NewGraphGetRequest("https://graph.microsoft.com/beta/domains?$top=999", tenantId)).Find(x => x.GetProperty("isInitial").GetBoolean().Equals(true)).GetProperty("id").ToString();
 				string uri = string.Format("https://outlook.office365.com/adminapi/beta/{0}/InvokeCommand", tenant);
 				HttpRequestMessage requestMessage = new (HttpMethod.Post, uri);
@@ -661,7 +661,7 @@ namespace CIPP_API_ALT.Common
 
 			if (uri.ToLower().Contains("https://graph.microsoft.com/beta/contracts") || uri.ToLower().Contains("/customers/") ||
 				uri.ToLower().Equals("https://graph.microsoft.com/v1.0/me/sendmail") ||
-				uri.ToLower().Contains("https://graph.microsoft.com/beta/tenantrelationships/managedtenants"))
+				uri.ToLower().Contains("https://graph.microsoft.com/beta/tenantrelationships/managedtenants") || uri.ToLower().Contains("https://graph.microsoft.com/v1.0/applications"))
 			{
 				return true;
 			}
@@ -671,9 +671,9 @@ namespace CIPP_API_ALT.Common
 			if (tenants != null && tenants.Count > 0)
 			{
 				// Check if tenantId exists in any of the properties of our allowed tenants
-				if (tenants.Find(x => x.DefaultDomainName.ToLower().Equals(tenantId.ToLower())) != null ||
-					tenants.Find(x => x.CustomerId.ToLower().Equals(tenantId.ToLower())) != null ||
-					tenants.Find(x => x.DisplayName.ToLower().Equals(tenantId.ToLower())) != null)
+				if (tenants.Find(x => x.defaultDomainName.ToLower().Equals(tenantId.ToLower())) != null ||
+					tenants.Find(x => x.customerId.ToLower().Equals(tenantId.ToLower())) != null ||
+					tenants.Find(x => x.displayName.ToLower().Equals(tenantId.ToLower())) != null)
 				{
 					return true;
 				}

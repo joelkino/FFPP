@@ -14,31 +14,49 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.7" />
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.7" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.25.1" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.25.1" />
+    <PackageReference Include="Microsoft.Graph" Version="4.35.0" />
     <PackageReference Include="Azure.Identity" Version="1.6.0" />
+    <PackageReference Include="Asp.Versioning.Http" Version="6.0.0-preview.3" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="6.0.0-preview.3" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Data\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Common\" />
     <Folder Include="Data\Cache\" />
     <Folder Include="Data\Logging\" />
-    <Folder Include="Tenants\" />
     <Folder Include="Data\SQLite\" />
-    <Folder Include="Licenses\" />
-    <Folder Include="Users\" />
     <Folder Include="wwwroot\" />
     <Folder Include="wwwroot\Swagger-Customisation\" />
-    <Folder Include="Dashboards\" />
+    <Folder Include="Versions\v1.1\" />
+    <Folder Include="Common\" />
+    <Folder Include="Versions\dev\" />
+    <Folder Include="Versions\api\" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Licenses\" />
     <None Remove="System.IdentityModel.Tokens.Jwt" />
-    <None Remove="Users\" />
     <None Remove="Dashboard\" />
+    <None Remove="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <None Remove="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
+    <None Remove="Microsoft.AspNetCore.Authentication.Cookies" />
+    <None Remove="Microsoft.Identity.Web" />
+    <None Remove="Microsoft.Identity.Web.UI" />
+    <None Remove="Microsoft.Graph" />
+    <None Remove="Azure.Identity" />
+    <None Remove="Microsoft.AspNet.WebApi.Versioning" />
+    <None Remove="Asp.Versioning.Http" />
+    <None Remove="Versions\v1.1\" />
+    <None Remove="Common\" />
+    <None Remove="Asp.Versioning.Mvc.ApiExplorer" />
+    <None Remove="Versions\dev\" />
+    <None Remove="Versions\api\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\" />
@@ -47,5 +65,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="wwwroot\Swagger-Customisation\Swagger-Customisation.css" />
+    <None Include="..\.editorconfig" />
   </ItemGroup>
 </Project>
