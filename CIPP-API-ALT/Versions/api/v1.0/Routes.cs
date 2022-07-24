@@ -106,45 +106,69 @@ namespace CIPP_API_ALT.Api.v10
             return new CurrentApiRoute();
         }
 
-        public static async Task<CippDashboard> GetDashboard(HttpContext context, string accessingUser)
+        public static async Task<CippDashboard> GetDashboard(HttpContext context, string accessingUser, bool simulateAuthed=false)
         {
-            string[] scopes = { "cipp-api-alt.access", "reader" };
-            context.VerifyUserHasAnyAcceptedScope(scopes);
+            if (!simulateAuthed)
+            {
+                string[] scopes = { "cipp-api-alt.access", "reader" };
+                context.VerifyUserHasAnyAcceptedScope(scopes);
+            }
+
             return await CippDashboard.GetHomeData(accessingUser);
         }
 
-        public static async Task<CippDashboard.Versions>GetVersion(HttpContext context, string LocalVersion, string accessingUser)
+        public static async Task<CippDashboard.Versions>GetVersion(HttpContext context, string LocalVersion, string accessingUser, bool simulateAuthed= false)
         {
-            string[] scopes = { "cipp-api-alt.access", "reader" };
-            context.VerifyUserHasAnyAcceptedScope(scopes);
+            if (!simulateAuthed)
+            {
+                string[] scopes = { "cipp-api-alt.access", "reader" };
+                context.VerifyUserHasAnyAcceptedScope(scopes);
+            }
+
             return await CippDashboard.CheckVersions(accessingUser, LocalVersion);
         }
 
-        public static async Task<List<Tenant>> ListTenants(HttpContext context, bool? AllTenantSelector, string accessingUser)
+        public static async Task<List<Tenant>> ListTenants(HttpContext context, bool? AllTenantSelector, string accessingUser, bool simulateAuthed = false)
         {
-            string[] scopes = { "cipp-api-alt.access", "reader" };
-            context.VerifyUserHasAnyAcceptedScope(scopes);
+            if (!simulateAuthed)
+            {
+                string[] scopes = { "cipp-api-alt.access", "reader" };
+                context.VerifyUserHasAnyAcceptedScope(scopes);
+            }
+
             return await Tenant.GetTenants(accessingUser, allTenantSelector: AllTenantSelector ?? false);
         }
 
-        public static async Task<bool> ListUserConditionalAccessPolicies(HttpContext context, string TenantFilter, string UserId, string accessingUser)
+        public static async Task<bool> ListUserConditionalAccessPolicies(HttpContext context, string TenantFilter, string UserId, string accessingUser, bool simulateAuthed = false)
         {
-            string[] scopes = { "cipp-api-alt.access", "reader" };
-            context.VerifyUserHasAnyAcceptedScope(scopes);
+            if (!simulateAuthed)
+            {
+                string[] scopes = { "cipp-api-alt.access", "reader" };
+                context.VerifyUserHasAnyAcceptedScope(scopes);
+            }
+
             return await User.GetUserConditionalAccessPolicies(TenantFilter, UserId ?? string.Empty, accessingUser);
         }
 
-        public static async Task<List<User>> ListUsers(HttpContext context, string TenantFilter, string UserId, string accessingUser)
+        public static async Task<List<User>> ListUsers(HttpContext context, string TenantFilter, string UserId, string accessingUser, bool simulateAuthed = false)
         {
-            string[] scopes = { "cipp-api-alt.access", "reader" };
-            context.VerifyUserHasAnyAcceptedScope(scopes);
+            if (!simulateAuthed)
+            {
+                string[] scopes = { "cipp-api-alt.access", "reader" };
+                context.VerifyUserHasAnyAcceptedScope(scopes);
+            }
+
             return await User.GetUsers(accessingUser, TenantFilter, UserId ?? string.Empty);
         }
 
-        public static async Task<List<Domain>> ListDomains(HttpContext context, string TenantFilter, string accessingUser)
+        public static async Task<List<Domain>> ListDomains(HttpContext context, string TenantFilter, string accessingUser, bool simulateAuthed = false)
         {
-            string[] scopes = { "cipp-api-alt.access", "reader" };
-            context.VerifyUserHasAnyAcceptedScope(scopes);
+            if (!simulateAuthed)
+            {
+                string[] scopes = { "cipp-api-alt.access", "reader" };
+                context.VerifyUserHasAnyAcceptedScope(scopes);
+            }
+
             return await Domain.GetDomains(accessingUser, TenantFilter);
         }
 

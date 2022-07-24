@@ -4,13 +4,8 @@
 /// didactic-barnacle is the random name chosen for this project by GitHub
 
 using Microsoft.AspNetCore.Http.Json;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.Resource;
 using Microsoft.OpenApi.Models;
-using CIPP_API_ALT;
-using CIPP_API_ALT.Data.Logging;
-using CIPP_API_ALT.Data;
 using CIPP_API_ALT.Common;
 using CIPP_API_ALT.Api.v10.Tenants;
 using CIPP_API_ALT.Api.v10.Licenses;
@@ -19,7 +14,6 @@ using CIPP_API_ALT.Api.v10.Dashboards;
 using ApiCurrent = CIPP_API_ALT.Api;
 using ApiV10 = CIPP_API_ALT.Api.v10;
 using ApiDev = CIPP_API_ALT.Api.v11;
-using Asp.Versioning;
 using Asp.Versioning.Builder;
 
 // Build Data/Cache directories if they don't exist
@@ -42,7 +36,15 @@ if (ApiEnvironment.ShowDevEnvEndpoints)
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
-builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAd");
+if (ApiEnvironment.IsDebug)
+{
+    builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAd", subscribeToJwtBearerMiddlewareDiagnosticsEvents: true);
+}
+else
+{
+    builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAd");
+}
+
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>
 {
@@ -198,20 +200,18 @@ else
 
 //string pname = License.ConvertSkuName("SPE_E3_RPA1", string.Empty);
 //await new CippLogs().LogDb.LogRequest("Test Message", "", "Information", "M365B654613.onmicrosoft.com", "ThisIsATest");
-List<Tenant> tenants = await Tenant.GetTenants(string.Empty);
+//List<Tenant> tenants = await Tenant.GetTenants(string.Empty);
 //await RequestHelper.NewTeamsApiGetRequest("https://api.interfaces.records.teams.microsoft.com/Skype.TelephoneNumberMgmt/Tenants/b439f90e-eb4a-40f3-b11a-d793c488b38a/telephone-numbers?locale=en-US", "b439f90e-eb4a-40f3-b11a-d793c488b38a", HttpMethod.Get);
 //await RequestHelper.GetClassicApiToken("M365B654613.onmicrosoft.com", "https://outlook.office365.com");
 //var code = await RequestHelper.NewDeviceLogin("a0c73c16-a7e3-4564-9a95-2bdf47383716", "https://outlook.office365.com/.default", true, "", "M365B654613.onmicrosoft.com");
 //await MsolUser.GetCippMsolUsers("M365B654613.onmicrosoft.com");
 //var ebay = await CippDashboard.GetHomeData();
 //CippDashboard.CheckVersions("2.9.0");
-
 //var salt = Utilities.Random2WordPhrase(24);
+//Sam.CreateSAMAuthApp("CIPP-API-ALT Auth", Sam.SamAppType.Api);
+//Sam.CreateSAMAuthApp("CIPP-API-ALT Swagger UI", Sam.SamAppType.Spa,spaRedirectUri: "https://localhost:7074/swagger/oauth2-redirect.html");
 
-Sam.CreateSAMAuthApp("CIPP-API-ALT Auth", Sam.SamAppType.Api);
-Sam.CreateSAMAuthApp("CIPP-API-ALT Swagger UI", Sam.SamAppType.Spa,spaRedirectUri: "https://localhost:7074/swagger/oauth2-redirect.html");
-
-List<Domain> domains = await Domain.GetDomains("",ApiEnvironment.Secrets.TenantId);
+List<Domain> domains = await Domain.GetDomains("", ApiEnvironment.Secrets.TenantId);
 
 var s = "";
 
