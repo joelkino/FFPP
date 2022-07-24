@@ -14,13 +14,22 @@ namespace CIPP_API_ALT.Api.v10.Tenants
 		/// <summary>
         /// Gets a CustomerId from a known DefaultDomain
         /// </summary>
-        /// <param name="defaultDomain">DefaultDomain that we wish to find the matching ClientIdf</param>
+        /// <param name="defaultDomain">DefaultDomain that we wish to find the matching CustomerId</param>
         /// <returns>ClientId</returns>
-		public async static Task<string> GetClientIdFromDefaultDomain(string defaultDomain)
+		public async static Task<string> GetCustomerIdFromDefaultDomain(string defaultDomain)
         {
 			return (await GetTenants(string.Empty, false)).Find(x => x.defaultDomainName.Equals(defaultDomain)).customerId ?? string.Empty;
         }
 
+		/// <summary>
+		/// Gets a DefaultDomain from a known CustomerId
+		/// </summary>
+		/// <param name="customerId">CustomerId that we wish to find the matching DefaultDomain</param>
+		/// <returns></returns>
+		public async static Task<string> GetDefaultDomainFromCustomerId(string customerId)
+		{
+			return (await GetTenants(string.Empty, false)).Find(x => x.customerId.Equals(customerId)).defaultDomainName ?? string.Empty;
+		}
 		/// <summary>
 		/// Returns the tenants managed in a partner relationship
 		/// </summary>

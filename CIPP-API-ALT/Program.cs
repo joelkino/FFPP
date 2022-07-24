@@ -6,6 +6,7 @@
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
+using System.Text.Json;
 using CIPP_API_ALT.Common;
 using CIPP_API_ALT.Api.v10.Tenants;
 using CIPP_API_ALT.Api.v10.Licenses;
@@ -21,38 +22,64 @@ ApiEnvironment.DataDirectoryBuild();
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load individual settings
 ApiEnvironment.UseHttpsRedirect = builder.Configuration.GetValue<bool>("ApiSettings:HttpsRedirect");
 ApiEnvironment.ShowDevEnvEndpoints = builder.Configuration.GetValue<bool>("ApiSettings:ShowDevEndpoints");
-ApiEnvironment.CippDomain = builder.Configuration.GetValue<string>("AzureAd:Domain")
-    .Replace("http://",string.Empty).Replace("https://", string.Empty).Replace("api://", string.Empty).TrimEnd('/'); // Protection against some novices entering scheme as well as domain, or trailing /
 ApiEnvironment.ShowSwaggerUi = builder.Configuration.GetValue<bool>("ApiSettings:ShowSwaggerUi");
+ApiEnvironment.RunSwagger = builder.Configuration.GetValue<bool>("ApiSettings:RunSwagger");
 
-// Expose development environment API endpoints
+// Expose development environment API endpoints if set in settiungs to do so
 if (ApiEnvironment.ShowDevEnvEndpoints)
 {
     ApiEnvironment.ApiRouteVersions.Add(double.Parse(ApiEnvironment.ApiDev.ToString()));
 }
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-
 if (ApiEnvironment.IsDebug)
 {
-    builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAd", subscribeToJwtBearerMiddlewareDiagnosticsEvents: true);
+    Console.WriteLine(string.Format("######################## CIPP-API-ALT is running in DEBUG context! - app.Environment.IsDevelopment():{0}",
+        builder.Environment.IsDevelopment().ToString()));
+
+    // In dev env we will get secrets from local environment (use `dotnet user-secrets` tool to safely store local secrets)
+    ApiEnvironment.Secrets.ApplicationId = builder.Configuration["ApplicationId"];
+    ApiEnvironment.Secrets.ApplicationSecret = builder.Configuration["ApplicationSecret"];
+    ApiEnvironment.Secrets.TenantId = builder.Configuration["TenantId"];
+    ApiEnvironment.Secrets.RefreshToken = builder.Configuration["RefreshToken"];
+    ApiEnvironment.Secrets.ExchangeRefreshToken = builder.Configuration["ExchangeRefreshToken"];
+
+    builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd", subscribeToJwtBearerMiddlewareDiagnosticsEvents: true);
+
 }
 else
 {
-    builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAd");
+    builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
+
+    // Todo production secrets logic i.e. Azure key vault stuff
 }
 
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization(options =>
+// We have yet to complete the Zero Configuration setup
+if (!ApiZeroConfiguration.ZeroConfExists())
 {
-    options.AddPolicy("all", policy => policy.RequireRole(ApiEnvironment.RoleOwner,ApiEnvironment.RoleAdmin,ApiEnvironment.RoleEditor,ApiEnvironment.RoleReader));
-    options.AddPolicy("edit", policy => policy.RequireRole(ApiEnvironment.RoleOwner, ApiEnvironment.RoleAdmin, ApiEnvironment.RoleEditor));
-    options.AddPolicy("admin", policy => policy.RequireRole(ApiEnvironment.RoleOwner, ApiEnvironment.RoleAdmin));
-    options.AddPolicy("owner", policy => policy.RequireRole(ApiEnvironment.RoleOwner));
-});
+    await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
+}
+
+// Read ZeroConf and load it into app config
+ApiZeroConfiguration zeroConf = Utilities.ReadJsonFromFile<ApiZeroConfiguration>(ApiEnvironment.ZeroConfPath);
+builder.Configuration["ZeroConf:AzureAd:TenantId"] = zeroConf.TenantId;
+builder.Configuration["ZeroConf:AzureAd:ClientId"] = zeroConf.ClientId;
+builder.Configuration["ZeroConf:AzureAd:Domain"] = zeroConf.Domain;
+builder.Configuration["ZeroConf:AzureAd:Scopes"] = zeroConf.Scopes;
+builder.Configuration["ZeroConf:AzureAd:AuthorizationUrl"] = zeroConf.AuthorizationUrl;
+builder.Configuration["ZeroConf:AzureAd:TokenUrl"] = zeroConf.TokenUrl;
+builder.Configuration["ZeroConf:AzureAd:ApiScope"] = zeroConf.ApiScope;
+builder.Configuration["ZeroConf:AzureAd:OpenIdClientId"] = zeroConf.OpenIdClientId;
+builder.Configuration["ZeroConf:AzureAd:Instance"] = zeroConf.Instance;
+builder.Configuration["ZeroConf:AzureAd:CallbackPath"] = zeroConf.CallbackPath;
+
+// Add auth services
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
+// Add API versioning capabilities
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddApiVersioning(options =>
 {
@@ -67,6 +94,7 @@ builder.Services.AddApiVersioning(options =>
     options.AssumeDefaultVersionWhenUnspecified = true;
 });
 
+// Prep Swagger and specify the auth settings for it to use a SAM on Azure AD
 builder.Services.AddSwaggerGen(customSwagger => {
 
     foreach (double version in ApiEnvironment.ApiRouteVersions)
@@ -88,11 +116,11 @@ builder.Services.AddSwaggerGen(customSwagger => {
         {
             AuthorizationCode = new OpenApiOAuthFlow
             {
-                AuthorizationUrl = new Uri(builder.Configuration["AzureAd:AuthorizationUrl"]),
-                TokenUrl = new Uri(builder.Configuration["AzureAd:TokenUrl"]),
+                AuthorizationUrl = new Uri(builder.Configuration["ZeroConf:AzureAd:AuthorizationUrl"]),
+                TokenUrl = new Uri(builder.Configuration["ZeroConf:AzureAd:TokenUrl"]),
                 Scopes = new Dictionary<string, string>
                 {
-                    { builder.Configuration["AzureAd:ApiScope"], builder.Configuration["AzureAd:Scopes"]}
+                    { builder.Configuration["ZeroConf:AzureAd:ApiScope"], builder.Configuration["ZeroConf:AzureAd:Scopes"]}
                 }
             }
         }
@@ -104,7 +132,7 @@ builder.Services.AddSwaggerGen(customSwagger => {
             {
                 Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "oauth2" }
             },
-            new[] { builder.Configuration["AzureAd:ApiScope"] }
+            new[] { builder.Configuration["ZeroConf:AzureAd:ApiScope"] }
         }
     });
 });
@@ -141,61 +169,43 @@ foreach (double version in ApiEnvironment.ApiRouteVersions)
 
 ApiEnvironment.ApiVersionSet = apiVersionSetBuilder.ReportApiVersions().Build();
 
-// /api path which uses the latest devenv API specification (will only be accessible if ShowDevEnvEndpoints = true)
+// /x.x (ApiEnvironment.ApiDev) path which uses the latest devenv API specification (will only be accessible if ShowDevEnvEndpoints = true)
 ApiDev.Routes.InitRoutes(ref app);
 
 // /api path which always uses the latest API specification
 ApiCurrent.Routes.InitRoutes(ref app);
 
-// /1.0 path using API specification v1.0
+// /v1.0 path using API specification v1.0
 ApiV10.Routes.InitRoutes(ref app);
 
-app.UseSwagger();
-
-if (ApiEnvironment.ShowSwaggerUi)
+if (ApiEnvironment.RunSwagger)
 {
-    app.UseSwaggerUI(customSwagger =>
+    app.UseSwagger();
+
+    // But we don't always show the UI for swagger
+    if (ApiEnvironment.ShowSwaggerUi)
     {
-
-        foreach (var desc in app.DescribeApiVersions())
+        app.UseSwaggerUI(customSwagger =>
         {
-            var url = $"/swagger/{desc.GroupName}/swagger.json";
-            var name = desc.GroupName.ToUpperInvariant();
-            if(desc.ApiVersion.ToString().Contains(ApiEnvironment.ApiDev.ToString()))
+
+            foreach (var desc in app.DescribeApiVersions())
             {
-                customSwagger.SwaggerEndpoint(url, $"CIPP-API-ALT DEV {name}");
-                continue;
+                var url = $"/swagger/{desc.GroupName}/swagger.json";
+                var name = desc.GroupName.ToUpperInvariant();
+                if (desc.ApiVersion.ToString().Contains(ApiEnvironment.ApiDev.ToString()))
+                {
+                    customSwagger.SwaggerEndpoint(url, $"CIPP-API-ALT DEV {name}");
+                    continue;
+                }
+                customSwagger.SwaggerEndpoint(url, $"CIPP-API-ALT {name}");
             }
-            customSwagger.SwaggerEndpoint(url, $"CIPP-API-ALT {name}");
-        }
 
-        customSwagger.InjectStylesheet("/Swagger-Customisation/Swagger-Customisation.css");
-        customSwagger.OAuthClientId(app.Configuration["AzureAd:OpenIdClientId"]);
-        customSwagger.OAuthUsePkce();
-        customSwagger.OAuthScopeSeparator(" ");
-    });
-}
-
-if (ApiEnvironment.IsDebug)
-{
-
-    Console.WriteLine(string.Format("######################## CIPP-API-ALT is running in DEBUG context! - app.Environment.IsDevelopment():{0}",
-        app.Environment.IsDevelopment().ToString()));
-
-    // In dev env we will get secrets from local environment (use `dotnet user-secrets` tool to safely store local secrets)
-    ApiEnvironment.Secrets.ApplicationId = app.Configuration["ApplicationId"];
-    ApiEnvironment.Secrets.ApplicationSecret = app.Configuration["ApplicationSecret"];
-    ApiEnvironment.Secrets.TenantId = app.Configuration["TenantId"];
-    ApiEnvironment.Secrets.RefreshToken = app.Configuration["RefreshToken"];
-    ApiEnvironment.Secrets.ExchangeRefreshToken = app.Configuration["ExchangeRefreshToken"];
-
-    // More information on exception page for dev/debug
-    app.UseDeveloperExceptionPage();
-
-}
-else
-{
-    // Todo production secrets logic i.e. Azure key vault stuff
+            customSwagger.InjectStylesheet("/Swagger-Customisation/Swagger-Customisation.css");
+            customSwagger.OAuthClientId(app.Configuration["ZeroConf:AzureAd:OpenIdClientId"]);
+            customSwagger.OAuthUsePkce();
+            customSwagger.OAuthScopeSeparator(" ");
+        });
+    }
 }
 
 //string pname = License.ConvertSkuName("SPE_E3_RPA1", string.Empty);

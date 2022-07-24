@@ -27,8 +27,10 @@ namespace CIPP_API_ALT.Common
         public static readonly string CachedTenantsFile = WorkingDir + "/Data/Cache/tenants.cache.json";
         public static readonly string LicenseConversionTableFile = WorkingDir + "/Data/ConversionTable.csv";
         public static readonly string LicenseConversionTableMisfitsFile = WorkingDir + "/Data/ConversionTableMisfits.csv";
+        public static readonly string ZeroConfPath = WorkingDir + "/Data/api.zeroconf.json";
         public static readonly string ApiVersionFile = WorkingDir + "/version_latest.txt";
         public static readonly string ApiHeader = "api";
+        public static readonly string ApiAccessScope = "cipp-api-alt.access";
         public static List<double> ApiRouteVersions = new(){1.0};
         public static ApiVersionSet ApiVersionSet { get; set; }
         public static readonly ApiVersion ApiDev = new(1.1);
@@ -38,9 +40,9 @@ namespace CIPP_API_ALT.Common
         public static readonly string RemoteCippAltApiVersion = "https://raw.githubusercontent.com/White-Knight-IT/CIPP-API-ALT/main/CIPP-API-ALT/version_latest.txt";
         public static readonly string RemoteCippVersion = "https://raw.githubusercontent.com/KelvinTegelaar/CIPP/master/version_latest.txt";
         public static readonly DateTime Started = DateTime.UtcNow;
-        public static string CippDomain = string.Empty;
         public static bool ShowDevEnvEndpoints = false;
         public static bool ShowSwaggerUi = false;
+        public static bool RunSwagger = false;
         public static bool UseHttpsRedirect { get; set; }
 
         /// <summary>

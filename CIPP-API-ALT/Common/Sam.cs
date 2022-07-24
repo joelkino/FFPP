@@ -7,7 +7,7 @@ namespace CIPP_API_ALT.Common
     {
         public enum SamAppType { Api, Spa };
 
-        public static async void CreateSAMAuthApp(string appName, SamAppType appType, PreAuthorizedApplication spaToAuth = new(), string spaRedirectUri="")
+        public static async Task<JsonElement> CreateSAMAuthApp(string appName, SamAppType appType, string domain, string swaggerUiAppId="", string spaRedirectUri="", string scopeGuid="")
         {
             dynamic samApp;
 
@@ -16,35 +16,44 @@ namespace CIPP_API_ALT.Common
                 case SamAppType.Api:
                     samApp = new ExpandoObject();
                     samApp.displayName = appName;
-                    samApp.identifierUris = new List<string>() { string.Format("https://{0}/{1}", ApiEnvironment.CippDomain, Guid.NewGuid().ToString()) };
 
-                    if (!spaToAuth.Equals(new PreAuthorizedApplication()))
+                    if (!swaggerUiAppId.Equals(string.Empty) && !scopeGuid.Equals(string.Empty))
                     {
+                        samApp.identifierUris = new List<string>() { string.Format("https://{0}/{1}", domain, Guid.NewGuid().ToString()) };
+
                         samApp.api = new ApiApplication()
                         {
                             acceptMappedClaims = null,
                             knownClientApplications = new List<string>(){},
                             requestedAccessTokenVersion = 2,
                             oauth2PermissionScopes = new List<PermissionScope>()
-                        {
-
-                            new PermissionScope
                             {
-                                id = Guid.NewGuid().ToString(),
-                                adminConsentDescription = "access the api",
-                                adminConsentDisplayName = "access the api",
-                                isEnabled = true,
-                                type = "Admin",
-                                userConsentDescription = "access the api",
-                                userConsentDisplayName = "access the api",
-                                value = "cipp-api-alt.access"
+                                new PermissionScope
+                                {
+                                    id = scopeGuid,
+                                    adminConsentDescription = "access the api",
+                                    adminConsentDisplayName = "access the api",
+                                    isEnabled = true,
+                                    type = "Admin",
+                                    userConsentDescription = "access the api",
+                                    userConsentDisplayName = "access the api",
+                                    value = ApiEnvironment.ApiAccessScope
+                                }
+                            },
+                            preAuthorizedApplications = new()
+                            {
+                                new PreAuthorizedApplication
+                                {
+                                    appId = swaggerUiAppId,
+                                    delegatedPermissionIds = new() { scopeGuid.ToString() }
+                                }
                             }
-                        },
-                            preAuthorizedApplications = new() { spaToAuth }
                         };
                     }
                     else
                     {
+                        samApp.identifierUris = new List<string>() { string.Format("https://{0}/{1}", domain, Guid.NewGuid().ToString()) };
+
                         samApp.api = new ApiApplication()
                         {
                             acceptMappedClaims = null,
@@ -115,8 +124,7 @@ namespace CIPP_API_ALT.Common
                     };
                     samApp.signInAudience = "AzureADMyOrg";
 
-                    var json = await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/applications", ApiEnvironment.Secrets.TenantId, samApp, HttpMethod.Post, "https://graph.microsoft.com/Application.ReadWrite.All", false);
-                    break;
+                    return await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/applications", ApiEnvironment.Secrets.TenantId, samApp, HttpMethod.Post, "https://graph.microsoft.com/Application.ReadWrite.All", false);
 
                 case SamAppType.Spa:
                     samApp = new ExpandoObject();
@@ -129,9 +137,10 @@ namespace CIPP_API_ALT.Common
                         samApp.spa = new Spa() { redirectUris = new() { spaRedirectUri } };
                     }
 
-                    var json2 = await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/applications", ApiEnvironment.Secrets.TenantId, samApp, HttpMethod.Post, "https://graph.microsoft.com/Application.ReadWrite.All", false);
-                    break;
+                    return await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/applications", ApiEnvironment.Secrets.TenantId, samApp, HttpMethod.Post, "https://graph.microsoft.com/Application.ReadWrite.All", false);
             }
+
+            return new();
         }
 
         public struct ResourceAccess

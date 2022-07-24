@@ -62,7 +62,7 @@ namespace CIPP_API_ALT.Data.Logging
             }
             catch(Exception ex)
             {
-                Console.WriteLine("Exception writing log entry in CippLogs: {0}, Inner Exception: {1}",ex.Message, ex.InnerException.Message);
+                Console.WriteLine("Exception writing log entry in CippLogs: {0}, Inner Exception: {1}",ex.Message, ex.InnerException.Message ?? string.Empty);
                 return false;
             }
         }

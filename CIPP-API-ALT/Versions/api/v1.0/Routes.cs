@@ -121,7 +121,7 @@ namespace CIPP_API_ALT.Api.v10
         {
             if (!simulateAuthed)
             {
-                string[] scopes = { "cipp-api-alt.access", "reader" };
+                string[] scopes = { "reader" };
                 context.VerifyUserHasAnyAcceptedScope(scopes);
             }
 

@@ -61,9 +61,22 @@
     <Content Remove="wwwroot\" />
     <Content Remove="wwwroot\Swagger-Customisation\Swagger-Customisation.css" />
     <Content Remove="wwwroot\Swagger-Customisation\" />
+    <Content Remove="Data\Cache\tenants.cache.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="wwwroot\Swagger-Customisation\Swagger-Customisation.css" />
     <None Include="..\.editorconfig" />
+    <None Include="Data\Cache\tenants.cache.json" Condition="'$(ExcludeConfigFilesFromBuildOutput)'!='true'">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Data\ConversionTable.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\ConversionTableMisfits.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

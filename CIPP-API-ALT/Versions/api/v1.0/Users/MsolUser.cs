@@ -19,7 +19,12 @@ namespace CIPP_API_ALT.Api.v10.Users
         {
             List<MsolUser> users = new();
             Dictionary<string, string> aadGraphToken = await RequestHelper.GetGraphToken("", false, scope: "https://graph.windows.net/.default");
-            string tenantId = await Tenant.GetClientIdFromDefaultDomain(tenant);
+            string tenantId = tenant;
+            // Get CustomnerId if tenantId is a domain
+            if (tenantId.Contains('.'))
+            {
+                tenantId = await Tenant.GetCustomerIdFromDefaultDomain(tenant);
+            }
             string trackingGuid = Guid.NewGuid().ToString();
             string logonPost = string.Format("<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:a=\"http://www.w3.org/2005/08/addressing\">" +
                 "<s:Header><a:Action s:mustUnderstand=\"1\">http://provisioning.microsoftonline.com/IProvisioningWebService/MsolConnect</a:Action><a:MessageID>" +
