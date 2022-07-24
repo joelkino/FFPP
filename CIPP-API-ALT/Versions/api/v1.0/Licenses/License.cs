@@ -1,6 +1,6 @@
 ﻿using CIPP_API_ALT.Common;
 
-namespace CIPP_API_ALT.v10.Licenses
+namespace CIPP_API_ALT.Api.v10.Licenses
 {
     /// <summary>
     /// Class used to define a M365 License SKU

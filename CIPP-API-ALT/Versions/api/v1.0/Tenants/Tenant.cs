@@ -1,17 +1,15 @@
 ﻿using System.Text.Json;
 using CIPP_API_ALT.Common;
 using CIPP_API_ALT.Data;
+using CIPP_API_ALT.Data.Logging;
 
-namespace CIPP_API_ALT.v10.Tenants
+namespace CIPP_API_ALT.Api.v10.Tenants
 {
     public class Tenant
     {
-        public Tenant(string customerId, string displayName, string defaultDomainName)
-        {
-			this.customerId = customerId;
-			this.defaultDomainName = defaultDomainName;
-			this.displayName = displayName;
-        }
+		public string? customerId { get; set; }
+		public string? defaultDomainName { get; set; }
+		public string? displayName { get; set; }
 
 		/// <summary>
         /// Gets a CustomerId from a known DefaultDomain
@@ -20,7 +18,7 @@ namespace CIPP_API_ALT.v10.Tenants
         /// <returns>ClientId</returns>
 		public async static Task<string> GetClientIdFromDefaultDomain(string defaultDomain)
         {
-			return (await GetTenants(false)).Find(x => x.defaultDomainName.Equals(defaultDomain)).customerId ?? string.Empty;
+			return (await GetTenants(string.Empty, false)).Find(x => x.defaultDomainName.Equals(defaultDomain)).customerId ?? string.Empty;
         }
 
 		/// <summary>
@@ -28,8 +26,13 @@ namespace CIPP_API_ALT.v10.Tenants
 		/// </summary>
 		/// <param name="exclude">True excludes ExcludedTenants</param>
 		/// <returns>Tenants managed in a partner relationship</returns>
-		public async static Task<List<Tenant>> GetTenants(bool exclude = true, bool allTenantSelector = false)
+		public async static Task<List<Tenant>> GetTenants(string accessingUser, bool exclude = true, bool allTenantSelector = false)
 		{
+			using (CippLogs logsDb = new())
+			{
+				await logsDb.LogRequest("Accessed this API", accessingUser, "Debug", "", "ListTenants");
+			}
+
 			List<Tenant> allTenants = new();
 			List<Tenant> outTenants = new();
 
@@ -40,7 +43,12 @@ namespace CIPP_API_ALT.v10.Tenants
             {
 				if(allTenantSelector)
                 {
-					listTenants.Add(new Tenant("AllTenants", "*All Tenants", "AllTenants"));
+                    listTenants.Add(new Tenant()
+					{
+						customerId= "AllTenants",
+						defaultDomainName = "*All Tenants",
+						displayName = "AllTenants"
+					});
                 }
 
                 using ExcludedTenants excludedTenantsDb = new();
@@ -84,10 +92,6 @@ namespace CIPP_API_ALT.v10.Tenants
 			Utilities.WriteJsonToFile<List<Tenant>>(allTenants, cacheFile.FullName);
 			return outTenants;
 		}
-
-		public string customerId { get; set; }
-		public string defaultDomainName { get; set; }
-		public string displayName { get; set; }
 	}
 }
 

@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Web;
 using System.Text.Json;
-using CIPP_API_ALT.v10.Tenants;
+using CIPP_API_ALT.Api.v10.Tenants;
 using CIPP_API_ALT.Data.Logging;
 
 namespace CIPP_API_ALT.Common
@@ -138,7 +138,7 @@ namespace CIPP_API_ALT.Common
 				headers = await GetGraphToken(tenantId, asApp, string.Empty, string.Empty, scope);
 			}
 
-			Utilities.DebugConsoleWrite(string.Format("Using {0} as url", uri));
+			CippLogs.DebugConsoleWrite(string.Format("Using {0} as url", uri));
 
 			string nextUrl = uri;
 
@@ -239,7 +239,7 @@ namespace CIPP_API_ALT.Common
 		{
 			Dictionary<string, string> headers = await GetGraphToken(tenantId, asApp, string.Empty, string.Empty, scope);
 
-			Utilities.DebugConsoleWrite(string.Format("Using {0} as url", uri));
+			CippLogs.DebugConsoleWrite(string.Format("Using {0} as url", uri));
 
 			if (await GetAuthorisedRequest(tenantId, uri))
 			{
@@ -356,7 +356,7 @@ namespace CIPP_API_ALT.Common
 		{
 			string token = (await GetClassicApiToken(tenantId, resource)).GetProperty("access_token").ToString();
 
-			Utilities.DebugConsoleWrite(string.Format("Using {0} as url in classic API GET request", uri));
+			CippLogs.DebugConsoleWrite(string.Format("Using {0} as url in classic API GET request", uri));
 
 			string nextUrl = uri;
 
@@ -458,7 +458,7 @@ namespace CIPP_API_ALT.Common
 		{
 			string token = (await GetClassicApiToken(tenantId, resource)).GetProperty("access_token").ToString();
 
-			Utilities.DebugConsoleWrite(string.Format("Using {0} as url in classic API POST request", uri));
+			CippLogs.DebugConsoleWrite(string.Format("Using {0} as url in classic API POST request", uri));
 			
 			JsonElement data = new();
 
@@ -537,7 +537,7 @@ namespace CIPP_API_ALT.Common
 
 			if (await GetAuthorisedRequest(tenantId))
 			{
-				string tenant = (await Tenant.GetTenants()).Find(x => x.defaultDomainName.Equals(tenantId)).customerId ?? string.Empty;
+				string tenant = (await Tenant.GetTenants(string.Empty)).Find(x => x.defaultDomainName.Equals(tenantId)).customerId ?? string.Empty;
 				string onMicrosoft = (await NewGraphGetRequest("https://graph.microsoft.com/beta/domains?$top=999", tenantId)).Find(x => x.GetProperty("isInitial").GetBoolean().Equals(true)).GetProperty("id").ToString();
 				string uri = string.Format("https://outlook.office365.com/adminapi/beta/{0}/InvokeCommand", tenant);
 				HttpRequestMessage requestMessage = new (HttpMethod.Post, uri);
@@ -644,10 +644,78 @@ namespace CIPP_API_ALT.Common
 		}
 
 		/// <summary>
-        /// Uses the HttpClient attached to this class to send HTTP request
-        /// </summary>
-        /// <param name="requestMessage">HttpRequestMessage to send</param>
-        /// <returns>HttpResponseMessage is returned</returns>
+		/// Used to describe a JWT v1 Token
+		/// </summary>
+		public struct TokenDetails
+		{
+			public TokenDetails(string appId = "", string appName = "", string audience = "", string authMethods = "", string iPAddress = "", string name = "", string scope = "", string tenantId = "", string userPrincipleName = "")
+			{
+				AppId = appId;
+				AppName = appName;
+				Audience = audience;
+				AuthMethods = authMethods;
+				IpAddress = iPAddress;
+				Name = name;
+				Scope = scope.Split(' ');
+				TenantId = tenantId;
+				UserPrincipalName = userPrincipleName;
+			}
+
+			public string AppId { get; }
+			public string AppName { get; }
+			public string Audience { get; }
+			public string AuthMethods { get; }
+			public string IpAddress { get; }
+			public string Name { get; }
+			public string[] Scope { get; }
+			public string TenantId { get; }
+			public string UserPrincipalName { get; }
+		}
+
+		/// <summary>
+		/// Converts a JWT v1 token into a JSON object
+		/// </summary>
+		/// <param name="token">Token to decode</param>
+		/// <returns>JSON object representing the token</returns>
+		public static async Task<TokenDetails> ReadJwtv1AccessDetails(string token)
+		{
+
+
+			if (!token.Contains('.') || !token.StartsWith("eyJ"))
+			{
+				return new TokenDetails();
+			}
+
+			byte[] tokenPayload = Utilities.Base64UrlDecode(token.Split('.')[1]);
+			string appName = string.Empty;
+			string upn = string.Empty;
+
+			JsonElement jsonToken = (await JsonDocument.ParseAsync(new MemoryStream(tokenPayload))).RootElement;
+
+			if (jsonToken.TryGetProperty("app_displayname", out JsonElement appNameJson))
+			{
+				appName = appNameJson.GetString() ?? string.Empty;
+			}
+
+			if (jsonToken.TryGetProperty("upn", out JsonElement upnJson))
+			{
+				upn = upnJson.GetString() ?? string.Empty;
+			}
+			else if (jsonToken.TryGetProperty("unique_name", out upnJson))
+			{
+				upn = upnJson.GetString() ?? string.Empty;
+			}
+
+			return new(jsonToken.GetProperty("appid").ToString(), appName,
+				jsonToken.GetProperty("aud").ToString(), jsonToken.GetProperty("amr").ToString(), jsonToken.GetProperty("ipaddr").ToString(),
+				jsonToken.GetProperty("name").ToString(), jsonToken.GetProperty("scp").ToString(), jsonToken.GetProperty("tid").ToString(), upn);
+		}
+
+		/// <summary>
+		/// Uses the HttpClient attached to this class to send HTTP request
+		/// </summary>
+		/// <param name="requestMessage">HttpRequestMessage to send</param>
+		/// <returns>HttpResponseMessage is returned</returns>
 		public static async Task<HttpResponseMessage> SendHttpRequest(HttpRequestMessage requestMessage)
         {
 			return await _httpClient.SendAsync(requestMessage);
@@ -661,12 +729,12 @@ namespace CIPP_API_ALT.Common
 
 			if (uri.ToLower().Contains("https://graph.microsoft.com/beta/contracts") || uri.ToLower().Contains("/customers/") ||
 				uri.ToLower().Equals("https://graph.microsoft.com/v1.0/me/sendmail") ||
-				uri.ToLower().Contains("https://graph.microsoft.com/beta/tenantrelationships/managedtenants") || uri.ToLower().Contains("https://graph.microsoft.com/v1.0/applications"))
+				uri.ToLower().Contains("https://graph.microsoft.com/beta/tenantrelationships/managedtenants") || (uri.ToLower().Contains("https://graph.microsoft.com/v1.0/applications") && tenantId.Equals(ApiEnvironment.Secrets.TenantId)) || (uri.ToLower().Contains("https://graph.microsoft.com/beta/domains") && tenantId.Equals(ApiEnvironment.Secrets.TenantId)))
 			{
 				return true;
 			}
 
-			List<Tenant> tenants = await Tenant.GetTenants();
+			List<Tenant> tenants = await Tenant.GetTenants(string.Empty);
 
 			if (tenants != null && tenants.Count > 0)
 			{

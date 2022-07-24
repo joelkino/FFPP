@@ -1,13 +1,7 @@
 ﻿{
+  // These settings are used when we run the project in Visual Studio,
+  // these settings conviniently open Swagger and are not used in production
   "$schema": "https://json.schemastore.org/launchsettings.json",
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:7073",
-      "sslPort": 7074
-    }
-  },
   "profiles": {
     "CIPP_API_ALT": {
       "commandName": "Project",
@@ -15,14 +9,6 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7074;http://localhost:7073",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

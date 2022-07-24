@@ -54,7 +54,7 @@ namespace CIPP_API_ALT.Data.Logging
                 }
 
                 // Write to console for debug environment
-                Utilities.DebugConsoleWrite(string.Format("[ {0} ] - {1} - {2} - {3} - {4} - {5} - {6}", DateTime.UtcNow.ToString(), severity, message, tenant, aPI, username, "false"));
+                DebugConsoleWrite(string.Format("[ {0} ] - {1} - {2} - {3} - {4} - {5} - {6}", DateTime.UtcNow.ToString(), severity, message, tenant, aPI, username, "false"));
                 
                 WriteLogEntry(new LogEntry { Severity = severity, Message = message, API = aPI, Tenant = tenant, Username = username, SentAsAlert = false });
 
@@ -74,6 +74,22 @@ namespace CIPP_API_ALT.Data.Logging
         public List<LogEntry> Top10LogEntries()
         {
             return _logEntries.OrderByDescending(x => x.Timestamp).Take(10).ToList() ?? new();
+        }
+
+        /// <summary>
+        /// Writes to the console only if we are running in debug
+        /// </summary>
+        /// <param name="content">Content to write to console</param>
+        /// <returns>bool which indicates successful write to console</returns>
+        public static bool DebugConsoleWrite(string content)
+        {
+            if (ApiEnvironment.IsDebug)
+            {
+                Console.WriteLine(content);
+                return true;
+            }
+
+            return false;
         }
         #endregion
 

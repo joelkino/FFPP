@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using CIPP_API_ALT.Data.Logging;
 
@@ -6,36 +7,38 @@ namespace CIPP_API_ALT.Common
 {
     public static class Utilities
     {
-        public static readonly List<string> WordDictionary = new() { "bruce", "bruceson", "john", "johnson", "big", "small",
-            "stinky", "outrageous", "valuable", "pineapple", "jack", "jackson", "peter", "file", "juices", "spruce", "cactus",
-            "blunt", "sharp", "affluent", "camel", "toe", "elbow", "knee", "old", "sponzengeiger", "wallace", "william", "jane",
-            "doe", "moe", "didactic", "barnacle", "sponge", "bob", "qwerty", "nelson", "full", "extreme", "poptart", "fbi", "nsa"};
+        public static readonly List<string> WordDictionary = new() { "bruce","bruceson","john","johnson","big","small","stinky",
+            "outrageous","valuable","pineapples","jack","jackson","peter","file","juices","spruce","cactus","blunt","sharp","affluent",
+            "camel","toe","elbow","knee","old","sponzengeiger","wallace","william","jane","doe","moe","didactic","barnacle","sponge",
+            "bob","qwerty","nelson","full","extreme","upstart","fbi","nsa","noah","ark","lancelot","potty","mouth","underpants","spiky",
+            "prickly","plaintiff","outlaw","bicycle","dopamine","pepper","trees","space","bananas","monkey","potatoes","crispy","pork",
+            "chop","bitcoin","boat","bone","floating","masked","behold","judith","ian","marcus","phoenix","wind","gasses","fluffy","pony",
+            "ewe","eyes","star","pole","dance","umpire","rebel","jones","noise","monero","cypher","aes256","aes128","sha256","sha512","xor",
+            "hmacsha256","hmacsha512","parrot","cat","dog","squirrel","skunk","farts","width","mountains","lumps","bumps","goose","high",
+            "tall","ball","cool","hot","tomato","chips","minimum","maximum","maximus","cease","strange","ugly","derelict","driven","mongoose",
+            "hold","grab","foolish","melons","pickles","lemons","sour","grapes","goat","milk","got","plums","spicy","rotating","ending","world",
+            "covid","vaccine","pass","fail","stop","fall","in","out","on","beginner","lessons","lapras","snorlax","round","square","cheeses",
+            "cheesy","golden","brown","lamb","killer","staged","frightening","laughter","desired","follicles","ultra","uber","plants","paris",
+            "bonjour","not","participating","precipitation","carrying","hooves","horse","rhubarb","apples","chilli","burn","heat","cold","pasta",
+            "jolting","crabs","rabbit","kangaroo","deal","screaming","zinger","alpha","bravo","charlie","delta","echo","foxtrot","golf","hotel",
+            "india","juliet","kilo","lima","mike","november","oscar","papa","quebec","romeo","sierra","tango","uniform","victor","whiskey","xray",
+            "zulu","aircraft","bouncing","bobcat","bonkers","nanny","popping","weasel","rolling","atomic","pure","fine","diesel","fishing","puppet",
+            "unicorn","epsilon","gamma","beta","thor","tennis","rally","cry","happy","suspicious","panda","bear","smile","frown","skirt","jellyfish",
+            "law","tax","criminal","escapade","popcorn","dogma","scared","lifeless","limitless","potential","voltage","amperage","amped","zapped",
+            "devil","salamander","frog","carrots","onions","dude","aubergine","appendage","cloudy","scaled","measured","response","excited","flustered",
+            "peacock","bin","garbage","trash","taco","beans","burger","alien","illegal","fragrant","floral","food","popsicle","ajar","test","sensual",
+            "schooled","varnish","lazy","starfish","belly","ring","of","fire","ice","yacht","russian","spider","web","fierce","furious","fast","factual",
+            "fred","nerf","fern","leaf","good","bad","noodles","boy","girl","sleep","thin","major","minor","private","public","nuisance","coffee","fetish"
+        };
 
         /// <summary>
-        /// Defines a Heartbeat object we return when the /api/Heartbeat API is polled
-        /// </summary>
-        public class Heartbeat
-        {
-            public DateTime started { get => ApiEnvironment.Started; }
-        }
-
-        /// <summary>
-        /// Defines a Heartbeat object we return when the /api/Heartbeat API is polled
-        /// </summary>
-        public class CurrentApiRoute
-        {
-            public string api { get => ApiEnvironment.ApiRouteVersions[^1].ToString(); }
-        }
-
-        /// <summary>
-        /// Returns a unicode string consisting of 4098 random bytes (4kb)
+        /// Returns a unicode string consisting of 4098 crypto random bytes (4kb), this is cryptosafe random
         /// </summary>
         /// <param name="length">Length of characters you want returned, defaults to 4098 (4kb)</param>
         /// <returns>4kb string of random unicode chars</returns>
         public static string RandomByteString(int length = 4098)
         {
-            byte[] randomFillerBytes = new byte[length];
-            new Random().NextBytes(randomFillerBytes);
+            byte[] randomFillerBytes = RandomNumberGenerator.GetBytes(length);
             return Encoding.Unicode.GetString(randomFillerBytes);
         }
 
@@ -55,8 +58,9 @@ namespace CIPP_API_ALT.Common
             };
 
             foreach (JsonElement je in rawJson)
-            {
+            {   
                 objectArrayList.Add(JsonSerializer.Deserialize<type>(je, options));
+
             }
 
             return objectArrayList;
@@ -141,7 +145,7 @@ namespace CIPP_API_ALT.Common
         /// <param name="arg">string to convert to bytes</param>
         /// <returns>byte[] containing decoded bytes</returns>
         /// <exception cref="Exception">Illegal base64url string</exception>
-        static byte[] Base64UrlDecode(string arg)
+        public static byte[] Base64UrlDecode(string arg)
         {
             string s = arg;
             s = s.Replace('-', '+'); // 62nd char of encoding
@@ -152,119 +156,97 @@ namespace CIPP_API_ALT.Common
                 case 2: s += "=="; break; // Two pad chars
                 case 3: s += "="; break; // One pad char
                 default:
-                    DebugConsoleWrite(string.Format("Illegal base64url string: {0}", arg));
+                    CippLogs.DebugConsoleWrite(string.Format("Illegal base64url string: {0}", arg));
                     throw new Exception(string.Format("Illegal base64url string: {0}", arg));
             }
             return Convert.FromBase64String(s); // Standard base64 decoder
         }
 
-
         /// <summary>
-        /// Used to describe a JWT v1 Token
+        /// Used to describe an ApiRandom object used to coinstruct cryptorandom things
+        /// used within the API
         /// </summary>
-        public struct TokenDetails
+        public class ApiRandom
         {
-            public TokenDetails(string appId = "", string appName = "", string audience = "", string authMethods = "", string iPAddress = "", string name = "", string scope = "", string tenantId = "", string userPrincipleName = "")
+            private readonly string _phrase;
+            private readonly string _hashedPhrase;
+            private readonly string _salt;
+            private readonly long _iterations;
+            private readonly bool _ignoreCryptoSafe;
+
+            /// <summary>
+            /// Creates an ApiRandom object that can be used to create a mnemonic phrase with accompanying hashed bytes
+            /// which are cryptographically safe as entropy (assuming at least 24 words in the phrase
+            /// </summary>
+            /// <param name="phrase">The phrase we will be </param>
+            /// <param name="salt"></param>
+            /// <param name="iterations"></param>
+            public ApiRandom(string phrase, string salt = "mmmsalty888", long iterations = 231010, bool ignoreCryptoSafe = false)
             {
-                AppId = appId;
-                AppName = appName;
-                Audience = audience;
-                AuthMethods = authMethods;
-                IpAddress = iPAddress;
-                Name = name;
-                Scope = scope.Split(' ');
-                TenantId = tenantId;
-                UserPrincipalName = userPrincipleName;
+                _ignoreCryptoSafe = ignoreCryptoSafe;
+                _iterations = iterations;
+                _phrase = phrase;
+                _salt = salt;
+                HMACSHA512 hasher = new(Encoding.Unicode.GetBytes(_phrase + _salt));
+                byte[] hashedPhraseBytes = hasher.ComputeHash(Encoding.Unicode.GetBytes(_phrase));
+
+                for (long i = 0; i < _iterations; i++)
+                {
+                    hashedPhraseBytes = hasher.ComputeHash(hashedPhraseBytes);
+                }
+
+                _hashedPhrase = Convert.ToHexString(hashedPhraseBytes);
             }
 
-            public string AppId { get; }
-            public string AppName { get; }
-            public string Audience { get; }
-            public string AuthMethods { get; }
-            public string IpAddress { get; }
-            public string Name { get; }
-            public string[] Scope { get; }
-            public string TenantId { get; }
-            public string UserPrincipalName { get; }
+            private bool CheckCryptoSafe()
+            {
+                if ((WordDictionary.Count > 299 && ((_phrase.Split('-').Length > 15) || (_phrase.Split('-').Length < 12 && _phrase.Length > 191)) && _iterations > 100000) || _ignoreCryptoSafe)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            public string Phrase { get { if (!CheckCryptoSafe()) { throw new("This ApiRandom is not Cryptosafe and we are not instructed to ignore Cryptosafety"); } return _phrase; } }
+            public string HashedPhrase { get { if (!CheckCryptoSafe()) { throw new("This ApiRandom is not Cryptosafe and we are not instructed to ignore Cryptosafety"); } return _hashedPhrase; } }
+            public byte[] HashedPhraseBytes { get { if (!CheckCryptoSafe()) { throw new("This ApiRandom is not Cryptosafe and we are not instructed to ignore Cryptosafety"); } return Convert.FromHexString(_hashedPhrase); } }
+            public string Salt { get { if (!CheckCryptoSafe()) { throw new("This ApiRandom is not Cryptosafe and we are not instructed to ignore Cryptosafety"); } return _salt; } }
+            public Guid HashedPhraseBytesAsGuid { get { if (!CheckCryptoSafe()) { throw new("This ApiRandom is not Cryptosafe and we are not instructed to ignore Cryptosafety"); } return new Guid(MD5.HashData(Convert.FromHexString(_hashedPhrase))); } }
+            public long Iterations { get => _iterations; }
         }
 
         /// <summary>
-        /// Converts a JWT v1 token into a JSON object
+        /// Generates x number of 2 random word phrases from WordDictionary in format [-{0}-{1}], is cryptorandom
+        /// so can be used for entropy but need a lot of 2 word phrases to create sufficiently strong entropy.
         /// </summary>
-        /// <param name="token">Token to decode</param>
-        /// <returns>JSON object representing the token</returns>
-        public static async Task<TokenDetails> ReadJwtv1AccessDetails(string token)
+        /// <param name="numberOfPhrases">Number of 2 word phrases to generate in the single line delimited by '-'</param>
+        /// <param name="salt">Optional salt to be used during sha512 hashing operation</param>
+        /// <returns>List where [0] contains word phrase, [1] contains hex encoded 100,000 pass sha512</returns>
+        public static ApiRandom Random2WordPhrase(int numberOfPhrases = 1, string salt= "mmmsalty888", long iterations = 231010, bool ignoreCryptoSafe = false)
         {
+            int i = 0;
+            string phrase = string.Empty;
 
+            do
+            {   // We can't return nothing
+                if (numberOfPhrases < 1)
+                {
+                    numberOfPhrases = 1;
+                }
 
-            if (!token.Contains('.') || !token.StartsWith("eyJ"))
-            {
-                return new TokenDetails();
-            }
+                static string RandomWord()
+                {
+                    return WordDictionary[RandomNumberGenerator.GetInt32(0, WordDictionary.Count)];
+                }
 
-            byte[] tokenPayload = Base64UrlDecode(token.Split('.')[1]);
-            string appName = string.Empty;
-            string upn = string.Empty;
+                phrase += string.Format("-{0}-{1}", RandomWord(), RandomWord());
 
-            JsonElement jsonToken = (await JsonDocument.ParseAsync(new MemoryStream(tokenPayload))).RootElement;
+                i++;
 
-            if (jsonToken.TryGetProperty("app_displayname", out JsonElement appNameJson))
-            {
-                appName = appNameJson.GetString() ?? string.Empty;
-            }
+            } while (i < numberOfPhrases);
 
-            if (jsonToken.TryGetProperty("upn", out JsonElement upnJson))
-            {
-                upn = upnJson.GetString() ?? string.Empty;
-            }
-            else if(jsonToken.TryGetProperty("unique_name", out upnJson))
-            {
-                upn = upnJson.GetString() ?? string.Empty;   
-            }
-
-            return new(jsonToken.GetProperty("appid").ToString(), appName,
-                jsonToken.GetProperty("aud").ToString(), jsonToken.GetProperty("amr").ToString(), jsonToken.GetProperty("ipaddr").ToString(),
-                jsonToken.GetProperty("name").ToString(), jsonToken.GetProperty("scp").ToString(), jsonToken.GetProperty("tid").ToString(), upn);
-        }
-
-        /// <summary>
-        /// Writes to the console only if we are running in debug
-        /// </summary>
-        /// <param name="content">Content to write to console</param>
-        /// <returns>bool which indicates successful write to console</returns>
-        public static bool DebugConsoleWrite(string content)
-        {
-            if(ApiEnvironment.IsDebug)
-            {
-                Console.WriteLine(content);
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Build data directories if they don't exist
-        /// </summary>
-        public static void DataDirectoryBuild()
-        {
-            Directory.CreateDirectory(ApiEnvironment.CacheDir);
-            Directory.CreateDirectory(ApiEnvironment.DatabaseDir);
-        }
-
-        /// <summary>
-        /// Generates 2 random words from WordDictionary seperated by a - character
-        /// </summary>
-        /// <returns>2 random words from WordDictionary seperated by a - character</returns>
-        public static string Random2Words()
-        {
-            string RandomWord()
-            {
-                return WordDictionary[(int)new Random((int)(DateTime.Now.Ticks / 7)).NextInt64(0, WordDictionary.Count())];
-            }
-
-            return string.Format("{0}-{1}", RandomWord(), RandomWord());
-            
+            return new(phrase.Remove(0,1), salt, iterations, ignoreCryptoSafe);
         }
     }
 }

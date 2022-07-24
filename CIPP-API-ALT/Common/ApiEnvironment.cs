@@ -28,25 +28,35 @@ namespace CIPP_API_ALT.Common
         public static readonly string LicenseConversionTableFile = WorkingDir + "/Data/ConversionTable.csv";
         public static readonly string LicenseConversionTableMisfitsFile = WorkingDir + "/Data/ConversionTableMisfits.csv";
         public static readonly string ApiVersionFile = WorkingDir + "/version_latest.txt";
-        public static readonly string ApiCurrentVersionHeader = "/api";
-        public static readonly List<double> ApiRouteVersions = new(){0.1,1.0,1.1};
+        public static readonly string ApiHeader = "api";
+        public static List<double> ApiRouteVersions = new(){1.0};
         public static ApiVersionSet ApiVersionSet { get; set; }
-        public static readonly ApiVersion ApiDev = new(ApiRouteVersions[0]);
-        public static readonly ApiVersion ApiV10 = new(ApiRouteVersions[1]);
-        public static readonly ApiVersion ApiV11 = new(ApiRouteVersions[2]);
+        public static readonly ApiVersion ApiDev = new(1.1);
+        public static readonly ApiVersion ApiV10 = new(ApiRouteVersions[0]);
+        public static readonly ApiVersion ApiV11 = ApiDev;
         public static readonly ApiVersion ApiCurrent = new(ApiRouteVersions[^1]);
-
         public static readonly string RemoteCippAltApiVersion = "https://raw.githubusercontent.com/White-Knight-IT/CIPP-API-ALT/main/CIPP-API-ALT/version_latest.txt";
         public static readonly string RemoteCippVersion = "https://raw.githubusercontent.com/KelvinTegelaar/CIPP/master/version_latest.txt";
         public static readonly DateTime Started = DateTime.UtcNow;
+        public static string CippDomain = string.Empty;
+        public static bool ShowDevEnvEndpoints = false;
+        public static bool ShowSwaggerUi = false;
         public static bool UseHttpsRedirect { get; set; }
 
+        /// <summary>
+        /// Build data directories if they don't exist
+        /// </summary>
+        public static void DataDirectoryBuild()
+        {
+            Directory.CreateDirectory(ApiEnvironment.CacheDir);
+            Directory.CreateDirectory(ApiEnvironment.DatabaseDir);
+        }
 
         /// <summary>
         /// Gets the Api version
         /// </summary>
         /// <returns>Api version object</returns>
-        public static CippVersion GetApiVersion()
+        public static CippVersion GetApiBinaryVersion()
         {
             return new(File.ReadLines(ApiVersionFile).First());           
         }

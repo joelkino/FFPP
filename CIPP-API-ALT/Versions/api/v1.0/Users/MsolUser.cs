@@ -2,10 +2,10 @@
 using System.Web;
 using System.Xml;
 using System.Xml.Serialization;
-using CIPP_API_ALT.v10.Tenants;
+using CIPP_API_ALT.Api.v10.Tenants;
 using CIPP_API_ALT.Common;
 
-namespace CIPP_API_ALT.v10.Users
+namespace CIPP_API_ALT.Api.v10.Users
 {
     [XmlRoot("User", Namespace = "http://schemas.datacontract.org/2004/07/Microsoft.Online.Administration")]
     public class MsolUser

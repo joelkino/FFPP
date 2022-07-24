@@ -2,9 +2,9 @@
 using System.Text.Json;
 using CIPP_API_ALT.Common;
 using CIPP_API_ALT.Data.Logging;
-using CIPP_API_ALT.v10.Licenses;
+using CIPP_API_ALT.Api.v10.Licenses;
 
-namespace CIPP_API_ALT.v10.Users
+namespace CIPP_API_ALT.Api.v10.Users
 {
     public class User
     {
@@ -61,13 +61,13 @@ namespace CIPP_API_ALT.v10.Users
         }
 
 
-        public static async Task<List<User>> GetUsers(string httpCookeiUser = "", string tenantFilter = "", string userId = "")
+        public static async Task<List<User>> GetUsers(string accessingUser = "", string tenantFilter = "", string userId = "")
         {
-
             using (CippLogs logsDb = new())
             {
-                await logsDb.LogRequest("Accessed this API",httpCookeiUser, "Debug", "", "ListUsers");
+                await logsDb.LogRequest("Accessed this API", accessingUser, "Debug", "", "ListUsers");
             }
+
             string selectList = "id,accountEnabled,businessPhones,city,createdDateTime,companyName,country,department,displayName,faxNumber,givenName,isResourceAccount,jobTitle,mail,mailNickname,mobilePhone,onPremisesDistinguishedName,officeLocation,onPremisesLastSyncDateTime,otherMails,postalCode,preferredDataLocation,preferredLanguage,proxyAddresses,showInAddressList,state,streetAddress,surname,usageLocation,userPrincipalName,userType,assignedLicenses,onPremisesSyncEnabled,LicJoined,Aliases,primDomain";
 
             List<JsonElement> returnedJson = await RequestHelper.NewGraphGetRequest(string.Format("https://graph.microsoft.com/beta/users/{0}?$top=999&$select={1}", userId, selectList), tenantFilter);
@@ -159,12 +159,12 @@ namespace CIPP_API_ALT.v10.Users
                     }
                     else
                     {
-                        Utilities.DebugConsoleWrite("Did not get HTTP 200 success attempting to fetch user last signin details.");
+                        CippLogs.DebugConsoleWrite("Did not get HTTP 200 success attempting to fetch user last signin details.");
                     }
                 }
                 else
                 {
-                    Utilities.DebugConsoleWrite("Did not get HTTP 200 success attempting to fetch token for user last signin details.");
+                    CippLogs.DebugConsoleWrite("Did not get HTTP 200 success attempting to fetch token for user last signin details.");
                 }
             }
 

@@ -1,22 +1,33 @@
 ﻿using CIPP_API_ALT.Data.Logging;
-using CIPP_API_ALT.v10.Tenants;
+using CIPP_API_ALT.Api.v10.Tenants;
 using CIPP_API_ALT.Common;
 
-namespace CIPP_API_ALT.v10.Dashboards
+namespace CIPP_API_ALT.Api.v10.Dashboards
 {
     public class CippDashboard
     {
-        public CippDashboard()
-        {
-
-        }
+        public string? NextStandardsRun { get; set; }
+        public string? NextBPARun { get; set; }
+        public string? NextDomainsRun { get; set; }
+        public int? queuedApps { get; set; }
+        public int? queuedStandards { get; set; }
+        public int? tenantCount { get; set; }
+        public string? RefreshTokenDate { get; set; }
+        public string? ExchangeTokenDate { get; set; }
+        public List<DashLogEntry>? LastLog { get; set; }
+        public List<string>? Alerts { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public async static Task<DashStats> GetHomeData()
+        public async static Task<CippDashboard> GetHomeData(string accessingUser)
         {
+            using (CippLogs logsDb = new())
+            {
+                await logsDb.LogRequest("Accessed this API", accessingUser, "Debug", "", "GetDashboard");
+            }
+
             List<DashLogEntry> last10Logs = new();
 
             using (CippLogs logDb = new())
@@ -27,35 +38,18 @@ namespace CIPP_API_ALT.v10.Dashboards
                 }
             }
 
-            return new DashStats()
+            return new CippDashboard()
             {
                 NextStandardsRun = DateTime.UtcNow.AddHours(3).ToString("yyyy-MM-ddThh:mm:ss"),
                 NextBPARun = DateTime.UtcNow.AddHours(3).ToString("yyyy-MM-ddThh:mm:ss"),
                 queuedApps = 0,
                 queuedStandards = 0,
-                tenantCount = (await Tenant.GetTenants(allTenantSelector: false)).Count,
+                tenantCount = (await Tenant.GetTenants(string.Empty, allTenantSelector: false)).Count,
                 RefreshTokenDate = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-dd"),
                 ExchangeTokenDate = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-dd"),
                 LastLog = last10Logs,
                 Alerts = AlertChecks()
             };
-        }
-
-        /// <summary>
-        /// Describes the data sent back for the /api/GetDashboard query
-        /// </summary>
-        public struct DashStats
-        {
-            public string NextStandardsRun { get; set; }
-            public string NextBPARun { get; set; }
-            public string NextDomainsRun { get; set; }
-            public int queuedApps { get; set; }
-            public int queuedStandards { get; set; }
-            public int tenantCount { get; set; }
-            public string RefreshTokenDate { get; set; }
-            public string ExchangeTokenDate { get; set; }
-            public List<DashLogEntry> LastLog { get; set; }
-            public List<string> Alerts { get; set; }
         }
 
         /// <summary>
@@ -72,9 +66,14 @@ namespace CIPP_API_ALT.v10.Dashboards
         /// </summary>
         /// <param name="cippVersion"></param>
         /// <returns></returns>
-        public static async Task<Versions> CheckVersions(string cippVersion)
+        public static async Task<Versions> CheckVersions(string accessingUser, string cippVersion)
         {
-            ApiEnvironment.CippVersion cippApiVersion = ApiEnvironment.GetApiVersion();
+            using (CippLogs logsDb = new())
+            {
+                await logsDb.LogRequest("Accessed this API", accessingUser, "Debug", "", "GetVersion");
+            }
+
+            ApiEnvironment.CippVersion cippApiVersion = ApiEnvironment.GetApiBinaryVersion();
 
             HttpRequestMessage requestMessage = new(HttpMethod.Get, ApiEnvironment.RemoteCippAltApiVersion);
             HttpResponseMessage responseMessage = await RequestHelper.SendHttpRequest(requestMessage);
