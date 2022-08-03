@@ -33,18 +33,10 @@ namespace CIPP_API_ALT.Data.Logging
         {
             try
             {
-                string username = string.Empty;
 
-                if (!string.IsNullOrEmpty(user))
+                if (string.IsNullOrEmpty(user))
                 {
-                    // Decoding user from the x-ms-s-client-principal header value passed in
-                    JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(Convert.FromBase64String(user)));
-                    username = jsonDoc.RootElement.EnumerateObject().FirstOrDefault(p => p.Name == "userDetails").Value.ToString();
-                }
-
-                if (string.IsNullOrEmpty(username))
-                {
-                    username = "CIPP";
+                    user = "CIPP";
                 }
 
                 if (severity.ToLower().Equals("debug") && !ApiEnvironment.IsDebug)
@@ -54,9 +46,9 @@ namespace CIPP_API_ALT.Data.Logging
                 }
 
                 // Write to console for debug environment
-                DebugConsoleWrite(string.Format("[ {0} ] - {1} - {2} - {3} - {4} - {5} - {6}", DateTime.UtcNow.ToString(), severity, message, tenant, aPI, username, "false"));
+                DebugConsoleWrite(string.Format("[ {0} ] - {1} - {2} - {3} - {4} - {5} - {6}", DateTime.UtcNow.ToString(), severity, message, tenant, aPI, user, "false"));
                 
-                WriteLogEntry(new LogEntry { Severity = severity, Message = message, API = aPI, Tenant = tenant, Username = username, SentAsAlert = false });
+                WriteLogEntry(new LogEntry { Severity = severity, Message = message, API = aPI, Tenant = tenant, Username = user, SentAsAlert = false });
 
                 return true;
             }
@@ -90,6 +82,20 @@ namespace CIPP_API_ALT.Data.Logging
             }
 
             return false;
+        }
+
+        public async static Task<string> ReadSwaUser(string user)
+        {
+            string username = string.Empty;
+
+            if (!string.IsNullOrEmpty(user))
+            {
+                // Decoding user from the x-ms-s-client-principal header value passed in
+                JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(Convert.FromBase64String(user)));
+                username = jsonDoc.RootElement.EnumerateObject().FirstOrDefault(p => p.Name == "userDetails").Value.ToString();
+            }
+
+            return username;
         }
         #endregion
 

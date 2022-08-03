@@ -1,9 +1,6 @@
-﻿using Asp.Versioning.Builder;
-using Asp.Versioning;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.Resource;
+﻿using Microsoft.Identity.Web.Resource;
 using CIPP_API_ALT.Common;
+using CIPP_API_ALT.Data.Logging;
 using CIPP_API_ALT.Api.v10.Dashboards;
 using CIPP_API_ALT.Api.v10.Users;
 using CIPP_API_ALT.Api.v10.Tenants;
@@ -15,7 +12,7 @@ namespace CIPP_API_ALT.Api.v10
     /// </summary>
     public static class Routes
     {
-        private static string _versionHeader = "v1.0";
+        private static readonly string _versionHeader = "v1.0";
 
         public static void InitRoutes(ref WebApplication app)
         {
@@ -34,8 +31,26 @@ namespace CIPP_API_ALT.Api.v10
             /// </summary>
             app.MapGet("/v{version:apiVersion}/GetDashboard", async (HttpContext context, HttpRequest request) =>
             {
-                string accessingUser = request.Headers["x-ms-client-principal"];
-                return await GetDashboard(context, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await GetDashboard(context, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
             .WithName(string.Format("/{0}/GetDashboard", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
@@ -44,8 +59,26 @@ namespace CIPP_API_ALT.Api.v10
             /// </summary>
             app.MapGet("/v{version:apiVersion}/GetVersion", async (HttpContext context, HttpRequest request, string LocalVersion) =>
             {
-                string accessingUser = request.Headers["x-ms-client-principal"];
-                return await GetVersion(context, LocalVersion, accessingUser);
+                string accessingUser = string.Empty;
+
+                if(ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await GetVersion(context, LocalVersion, accessingUser);
+                }
+                catch(UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
             .WithName(string.Format("/{0}/GetVersion", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
@@ -63,19 +96,84 @@ namespace CIPP_API_ALT.Api.v10
             /// </summary>
             app.MapGet("/v{version:apiVersion}/ListDomains", async (HttpContext context, HttpRequest request, string TenantFilter) =>
             {
-                string accessingUser = request.Headers["x-ms-client-principal"];
-                return await ListDomains(context, TenantFilter, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await ListDomains(context, TenantFilter, accessingUser);
+                }              
+                catch(UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
             .WithName(string.Format("/{0}/ListDomains", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
+            /// <summary>
+            /// /v1.0/ListSites
+            /// </summary>
+            app.MapGet("/v{version:apiVersion}/ListSites", async (HttpContext context, HttpRequest request, string TenantFilter, string Type, string? UserUPN) =>
+            {
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await ListSites(context, TenantFilter, Type, UserUPN ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
+
+            })
+            .WithName(string.Format("/{0}/ListSites", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListTenants
             /// </summary>
             app.MapGet("/v{version:apiVersion}/ListTenants", async (HttpContext context, HttpRequest request, bool ? AllTenantSelector) =>
             {
-                string accessingUser = request.Headers["x-ms-client-principal"];
-                return await ListTenants(context, AllTenantSelector ?? false, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await ListTenants(context, AllTenantSelector ?? false, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
+
             })
             .WithName(string.Format("/{0}/ListTenants", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
@@ -84,18 +182,81 @@ namespace CIPP_API_ALT.Api.v10
             /// </summary>
             app.MapGet("/v{version:apiVersion}/ListUserConditionalAccessPolicies", async (HttpContext context, HttpRequest request, string TenantFilter, string UserId) =>
             {
-                string accessingUser = request.Headers["x-ms-client-principal"];
-                return await ListUserConditionalAccessPolicies(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try { 
+                    return await ListUserConditionalAccessPolicies(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
             .WithName(string.Format("/{0}/ListUserConditionalAccessPolicies", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+
+            /// <summary>
+            /// /v1.0/ListUserMailboxDetails
+            /// </summary>
+            app.MapGet("/v{version:apiVersion}/ListUserMailboxDetails", async (HttpContext context, HttpRequest request, string TenantFilter, string UserId) =>
+            {
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await ListUserMailboxDetails(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
+            })
+            .WithName(string.Format("/{0}/ListUserMailboxDetails", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListUsers
             /// </summary>
             app.MapGet("/v{version:apiVersion}/ListUsers", async (HttpContext context, HttpRequest request, string TenantFilter, string? UserId) =>
             {
-                var accessingUser = request.Headers["x-ms-client-principal"];
-                return await ListUsers(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await ListUsers(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
             .WithName(string.Format("/{0}/ListUsers", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
             #endregion
@@ -106,70 +267,116 @@ namespace CIPP_API_ALT.Api.v10
             return new CurrentApiRoute();
         }
 
-        public static async Task<CippDashboard> GetDashboard(HttpContext context, string accessingUser, bool simulateAuthed=false)
+        public static async Task<object> GetDashboard(HttpContext context, string accessingUser)
         {
-            if (!simulateAuthed)
+            if (!ApiEnvironment.CippCompatibilityMode)
             {
-                string[] scopes = { "cipp-api-alt.access", "reader" };
-                context.VerifyUserHasAnyAcceptedScope(scopes);
+                CheckUserIsReader(context);
             }
 
             return await CippDashboard.GetHomeData(accessingUser);
         }
 
-        public static async Task<CippDashboard.Versions>GetVersion(HttpContext context, string LocalVersion, string accessingUser, bool simulateAuthed= false)
+        public static async Task<object>GetVersion(HttpContext context, string LocalVersion, string accessingUser)
         {
-            if (!simulateAuthed)
+            if (!ApiEnvironment.CippCompatibilityMode)
             {
-                string[] scopes = { "reader" };
-                context.VerifyUserHasAnyAcceptedScope(scopes);
+                CheckUserIsReader(context);
             }
 
             return await CippDashboard.CheckVersions(accessingUser, LocalVersion);
         }
 
-        public static async Task<List<Tenant>> ListTenants(HttpContext context, bool? AllTenantSelector, string accessingUser, bool simulateAuthed = false)
+        public static async Task<object> ListSites(HttpContext context, string tenantFilter, string type, string userUpn, string accessingUser)
         {
-            if (!simulateAuthed)
+            if (!ApiEnvironment.CippCompatibilityMode)
             {
-                string[] scopes = { "cipp-api-alt.access", "reader" };
-                context.VerifyUserHasAnyAcceptedScope(scopes);
+                CheckUserIsReader(context);
+            }
+
+            return await User.GetSites(tenantFilter, type, userUpn, accessingUser);
+        }
+
+        public static async Task<object> ListTenants(HttpContext context, bool? AllTenantSelector, string accessingUser)
+        {
+            if (!ApiEnvironment.CippCompatibilityMode)
+            {
+                CheckUserIsReader(context);
             }
 
             return await Tenant.GetTenants(accessingUser, allTenantSelector: AllTenantSelector ?? false);
         }
 
-        public static async Task<bool> ListUserConditionalAccessPolicies(HttpContext context, string TenantFilter, string UserId, string accessingUser, bool simulateAuthed = false)
+        public static async Task<object> ListUserConditionalAccessPolicies(HttpContext context, string TenantFilter, string UserId, string accessingUser)
         {
-            if (!simulateAuthed)
+            if (!ApiEnvironment.CippCompatibilityMode)
             {
-                string[] scopes = { "cipp-api-alt.access", "reader" };
-                context.VerifyUserHasAnyAcceptedScope(scopes);
+                CheckUserIsReader(context);
             }
 
             return await User.GetUserConditionalAccessPolicies(TenantFilter, UserId ?? string.Empty, accessingUser);
         }
 
-        public static async Task<List<User>> ListUsers(HttpContext context, string TenantFilter, string UserId, string accessingUser, bool simulateAuthed = false)
+        public static async Task<object> ListUserMailboxDetails(HttpContext context, string TenantFilter, string UserId, string accessingUser)
         {
-            if (!simulateAuthed)
+            if (!ApiEnvironment.CippCompatibilityMode)
             {
-                string[] scopes = { "cipp-api-alt.access", "reader" };
-                context.VerifyUserHasAnyAcceptedScope(scopes);
+                CheckUserIsReader(context);
+            }
+
+            return await User.GetUserMailboxDetails(TenantFilter, UserId ?? string.Empty, accessingUser);
+        }
+
+        public static async Task<object> ListUsers(HttpContext context, string TenantFilter, string UserId, string accessingUser)
+        {
+            if (!ApiEnvironment.CippCompatibilityMode)
+            {
+                CheckUserIsReader(context);
             }
 
             return await User.GetUsers(accessingUser, TenantFilter, UserId ?? string.Empty);
         }
 
-        public static async Task<List<Domain>> ListDomains(HttpContext context, string TenantFilter, string accessingUser, bool simulateAuthed = false)
+        public static async Task<object> ListDomains(HttpContext context, string TenantFilter, string accessingUser)
         {
-            if (!simulateAuthed)
+            if (!ApiEnvironment.CippCompatibilityMode)
             {
-                string[] scopes = { "cipp-api-alt.access", "reader" };
-                context.VerifyUserHasAnyAcceptedScope(scopes);
+                CheckUserIsReader(context);
             }
 
             return await Domain.GetDomains(accessingUser, TenantFilter);
+        }
+
+        private static void CheckUserIsReader(HttpContext context)
+        {
+            string[] scopes = { "cipp-api-alt.access" };
+            string[] roles = { "owner", "admin", "editor", "reader" };
+            context.ValidateAppRole(roles);
+            context.VerifyUserHasAnyAcceptedScope(scopes);
+        }
+
+        private static void CheckUserIsEditor(HttpContext context)
+        {
+            string[] scopes = { "cipp-api-alt.access" };
+            string[] roles = { "owner", "admin", "editor" };
+            context.ValidateAppRole(roles);
+            context.VerifyUserHasAnyAcceptedScope(scopes);
+        }
+
+        private static void CheckUserIsAdmin(HttpContext context)
+        {
+            string[] scopes = { "cipp-api-alt.access" };
+            string[] roles = { "owner", "admin" };
+            context.ValidateAppRole(roles);
+            context.VerifyUserHasAnyAcceptedScope(scopes);
+        }
+
+        private static void CheckUserIsOwner(HttpContext context)
+        {
+            string[] scopes = { "cipp-api-alt.access" };
+            string[] roles = { "owner" };
+            context.ValidateAppRole(roles);
+            context.VerifyUserHasAnyAcceptedScope(scopes);
         }
 
         /// <summary>
@@ -188,6 +395,14 @@ namespace CIPP_API_ALT.Api.v10
             public string api { get => "v" + ApiEnvironment.ApiRouteVersions[^1].ToString("f1"); }
         }
 
+        /// <summary>
+        /// Defines the error we send back in JSON payload
+        /// </summary>
+        public struct ErrorResponseBody
+        {
+            public int errorCode { get; set; }
+            public string message { get; set; }
+        }
     }
 }
 

@@ -48,7 +48,7 @@ namespace CIPP_API_ALT.Api.v10.Tenants
 			FileInfo cacheFile = new(ApiEnvironment.CachedTenantsFile);
 			string uri = "https://graph.microsoft.com/beta/contracts?$select=customerId,defaultDomainName,displayName&$top=999";
 			
-			void CheckExclusions(Tenant[] tenantArray, ref List<Tenant> listTenants, ref List<Tenant> allTenants)
+			void CheckExclusions(List<Tenant> tenantArray, ref List<Tenant> listTenants, ref List<Tenant> allTenants)
             {
 				if(allTenantSelector)
                 {
@@ -82,20 +82,16 @@ namespace CIPP_API_ALT.Api.v10.Tenants
 			if(cacheFile.Exists && cacheFile.LastWriteTimeUtc >= DateTime.UtcNow.AddMinutes(-7))
             {
 				//Read tenants from cache as they were cached in last 15m
-				CheckExclusions(Utilities.ReadJsonFromFile<List<Tenant>>(cacheFile.FullName).ToArray<Tenant>(),ref outTenants, ref allTenants);
+				CheckExclusions(Utilities.ReadJsonFromFile<List<Tenant>>(cacheFile.FullName),ref outTenants, ref allTenants);
 				return outTenants;
 
 			}
 
 			List<JsonElement> tenants = await RequestHelper.NewGraphGetRequest(uri, ApiEnvironment.Secrets.TenantId);
 
-			List<Tenant[]> tenantArrayList = Utilities.ParseJson<Tenant[]>(tenants);
+			List<Tenant> tenantArrayList = Utilities.ParseJson<Tenant>(tenants);
 
-			// We flatten our list of tenant arrays into a list of tenants instead
-			foreach(Tenant[] ta in tenantArrayList)
-            {
-				CheckExclusions(ta, ref outTenants, ref allTenants);
-            }
+			CheckExclusions(tenantArrayList, ref outTenants, ref allTenants);
 
 			// We write all tenants to cache not just unexcluded tenants
 			Utilities.WriteJsonToFile<List<Tenant>>(allTenants, cacheFile.FullName);

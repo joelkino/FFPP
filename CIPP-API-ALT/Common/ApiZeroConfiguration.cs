@@ -43,14 +43,14 @@ namespace CIPP_API_ALT.Common
 
             // step one - create SAM SPA that the Swagger UI will use to authenticate
 
-            JsonElement samSpa = await Sam.CreateSAMAuthApp("CIPP-API-ALT Swagger UI", Sam.SamAppType.Spa, domain, spaRedirectUri: "https://localhost:7074/swagger/oauth2-redirect.html");
+            JsonElement samSpa = await Sam.CreateSAMAuthApp("CIPP-API-ALT UI", Sam.SamAppType.Spa, domain, spaRedirectUri: "https://localhost:7074/swagger/oauth2-redirect.html");
             string openIdClientId = samSpa.GetProperty("appId").GetString() ?? string.Empty;
             if (!openIdClientId.Equals(string.Empty))
             {
                 // Wait 10 seconds to ensure the SPA gets registered
                 await Task.Delay(10000);
-                // step two - create SAM that will act as the authentication hub of the API
 
+                // step two - create SAM that will act as the authentication hub of the API
                 JsonElement samApi = await Sam.CreateSAMAuthApp("CIPP-API-ALT Auth", Sam.SamAppType.Api, domain, openIdClientId, scopeGuid: apiScopeGuid);
                 string clientId = samApi.GetProperty("appId").GetString() ?? string.Empty;
                 string idUri = samApi.GetProperty("identifierUris").EnumerateArray().ToArray()[0].GetString() ?? string.Empty;

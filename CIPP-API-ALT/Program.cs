@@ -27,6 +27,7 @@ ApiEnvironment.UseHttpsRedirect = builder.Configuration.GetValue<bool>("ApiSetti
 ApiEnvironment.ShowDevEnvEndpoints = builder.Configuration.GetValue<bool>("ApiSettings:ShowDevEndpoints");
 ApiEnvironment.ShowSwaggerUi = builder.Configuration.GetValue<bool>("ApiSettings:ShowSwaggerUi");
 ApiEnvironment.RunSwagger = builder.Configuration.GetValue<bool>("ApiSettings:RunSwagger");
+ApiEnvironment.CippCompatibilityMode = builder.Configuration.GetValue<bool>("ApiSettings:CippUiCampatibility");
 
 // Expose development environment API endpoints if set in settiungs to do so
 if (ApiEnvironment.ShowDevEnvEndpoints)
@@ -78,6 +79,12 @@ builder.Configuration["ZeroConf:AzureAd:CallbackPath"] = zeroConf.CallbackPath;
 // Add auth services
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
+string corsUri = builder.Configuration["ApiSettings:WebUiUrl"];
+builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
+{
+    // This allows for our Web UI which may be at a totally different domain and/or port to comminucate with the API
+    builder.WithOrigins(corsUri).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+}));
 
 // Add API versioning capabilities
 builder.Services.AddEndpointsApiExplorer();
@@ -147,6 +154,8 @@ builder.Services.Configure<JsonOptions>(options =>
 });
 
 var app = builder.Build();
+
+app.UseCors("corsapp");
 
 app.UseAuthentication();
 app.UseAuthorization();

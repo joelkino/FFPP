@@ -117,3 +117,5 @@ Given that this is a web API, it is not expected to have a user interface when i
 ![Swagger UI Screenshot 2](/README-IMAGES/Swagger-UI-2.png)
 
 ![Swagger UI Screenshot 3](/README-IMAGES/Swagger-UI-3.png)
+
+**NOTE:** When running in debug mode in Visual Studio Code, the Swagger UI is not automatically shown in the browser when you launch the debugging session. When the browser opens up with an error page at https://localhost:port, add `/swagger/index.html` onto the URL in the address bar and hit enter, then you will see the Swagger UI. Swagger UI is never shown when running in release mode.

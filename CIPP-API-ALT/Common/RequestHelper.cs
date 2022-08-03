@@ -126,6 +126,7 @@ namespace CIPP_API_ALT.Common
 		/// <returns>A List containing one or more JSON Elements</returns>
 		public static async Task<List<JsonElement>> NewGraphGetRequest(string uri, string tenantId, string scope = "https://graph.microsoft.com//.default", bool asApp = false, bool noPagination = false)
 		{
+			List<JsonElement> data = new();
 			Dictionary<string, string> headers;
 
 			if (scope.ToLower().Equals("exchangeonline"))
@@ -141,8 +142,6 @@ namespace CIPP_API_ALT.Common
 			CippLogs.DebugConsoleWrite(string.Format("Using {0} as url", uri));
 
 			string nextUrl = uri;
-
-			List<JsonElement> data = new();
 
 			if (await GetAuthorisedRequest(tenantId, uri))
 			{
@@ -166,14 +165,31 @@ namespace CIPP_API_ALT.Common
 
 							if (responseMessage.IsSuccessStatusCode)
 							{
+
 								JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(await responseMessage.Content.ReadAsByteArrayAsync()));
+
 								try
 								{
-									data.Add(jsonDoc.RootElement.GetProperty("value"));
+									if (jsonDoc.RootElement.GetProperty("value").ValueKind == JsonValueKind.Array)
+									{
+										data.AddRange(jsonDoc.RootElement.GetProperty("value").EnumerateArray().ToList());
+									}
+									else
+                                    {
+										data.Add(jsonDoc.RootElement.GetProperty("value"));
+									}
+
 								}
 								catch
 								{
-									data.Add(jsonDoc.RootElement);
+									if (jsonDoc.RootElement.ValueKind == JsonValueKind.Array)
+									{
+										data.AddRange(jsonDoc.RootElement.EnumerateArray().ToList());
+									}
+									else
+                                    {
+										data.Add(jsonDoc.RootElement);
+									}
 								}
 
 								if (noPagination)
@@ -213,6 +229,83 @@ namespace CIPP_API_ALT.Common
 				}
 				while (!string.IsNullOrEmpty(nextUrl));
 
+			}
+			else
+			{
+				using (CippLogs logDb = new())
+				{
+					await logDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope", string.Empty, "Info", tenantId, "NewGraphGetRequest");
+				}
+			}
+
+			return data;
+		}
+
+		/// <summary>
+		/// Sends a HTTP GET request to supplied uri using graph access_token for auth
+		/// </summary>
+		/// <param name="uri">The url we wish to GET from</param>
+		/// <param name="tenantId">The tenant the request relates to</param>
+		/// <param name="scope"></param>
+		/// <param name="asApp">As application or as delegated user</param>
+		/// <returns>A string representing content returned in the response</returns>
+		public static async Task<string> NewGraphGetRequestString(string uri, string tenantId, string scope = "https://graph.microsoft.com//.default", bool asApp = false)
+		{
+			string data = string.Empty;
+			Dictionary<string, string> headers;
+
+			if (scope.ToLower().Equals("exchangeonline"))
+			{
+				headers = await GetGraphToken(tenantId, asApp, "a0c73c16-a7e3-4564-9a95-2bdf47383716", ApiEnvironment.Secrets.ExchangeRefreshToken, "https://outlook.office365.com/.default");
+
+			}
+			else
+			{
+				headers = await GetGraphToken(tenantId, asApp, string.Empty, string.Empty, scope);
+			}
+
+			CippLogs.DebugConsoleWrite(string.Format("Using {0} as url", uri));
+
+			if (await GetAuthorisedRequest(tenantId, uri))
+			{
+				try
+				{
+					using HttpRequestMessage requestMessage = new(HttpMethod.Get, uri);
+					{
+						requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", headers.GetValueOrDefault("Authorization", "FAILED-TO-GET-AUTH-TOKEN"));
+						requestMessage.Headers.TryAddWithoutValidation("ConsistencyLevel", "eventual");
+
+						foreach (KeyValuePair<string, string> _h in headers)
+						{
+							if (!_h.Key.ToLower().Equals("authorization"))
+							{
+								requestMessage.Headers.TryAddWithoutValidation(_h.Key, _h.Value);
+							}
+						}
+						HttpResponseMessage responseMessage = await SendHttpRequest(requestMessage);
+
+						if (responseMessage.IsSuccessStatusCode)
+						{
+
+							data = await responseMessage.Content.ReadAsStringAsync();
+
+						}
+						else
+						{
+							using (CippLogs logDb = new())
+							{
+								// Write to log an error that we didn't get HTTP 2XX
+								await logDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}",
+									responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewGraphGetRequest");
+							}
+						}
+					}
+				}
+				catch (Exception exception)
+				{
+					Console.WriteLine(string.Format("Exception in NewGraphGetRequest: {0}, Inner Exception: {1}", exception.Message, exception.InnerException.Message));
+					throw;
+				}
 			}
 			else
 			{
@@ -454,7 +547,7 @@ namespace CIPP_API_ALT.Common
         /// <param name="resource"></param>
         /// <param name="headers"></param>
         /// <returns></returns>
-		public static async Task<JsonElement> NewClassicApiPostRequest(string tenantId, string uri, HttpMethod httpMethod, string body, string resource = "https://admin.microsoft.com", Dictionary<string, string>? headers = null)
+		public static async Task<JsonElement> NewClassicApiPostRequest(string tenantId, string uri, HttpMethod httpMethod, object body, string resource = "https://admin.microsoft.com", Dictionary<string, string>? headers = null)
 		{
 			string token = (await GetClassicApiToken(tenantId, resource)).GetProperty("access_token").ToString();
 
@@ -525,13 +618,16 @@ namespace CIPP_API_ALT.Common
 		}
 
 		/// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tenantId"></param>
-        /// <param name="body"></param>
-        /// <returns></returns>
-		public static async Task<JsonElement> NewExoRequest(string tenantId, string body)
+		/// 
+		/// </summary>
+		/// <param name="tenantId"></param>
+		/// <param name="body"></param>
+		/// <returns></returns>
+		public static async Task<JsonElement> NewExoRequest(string tenantId, string cmdLet, object? cmdParams = null)
 		{
+
+			CmdletBody exoBody = new() { CmdletInput = new() { CmdletName = cmdLet, Parameters = cmdParams ?? JsonSerializer.Deserialize<JsonElement>(@"{}") } };
+
 			string token = (await GetClassicApiToken(tenantId, "https://outlook.office365.com")).GetProperty("access_token").ToString();
 			JsonElement returnData = new();
 
@@ -542,11 +638,11 @@ namespace CIPP_API_ALT.Common
 				string uri = string.Format("https://outlook.office365.com/adminapi/beta/{0}/InvokeCommand", tenant);
 				HttpRequestMessage requestMessage = new (HttpMethod.Post, uri);
 				requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-				requestMessage.Headers.TryAddWithoutValidation("X-AnchorMailbox", string.Format("UPN:SystemMailbox{bb558c35-97f1-4cb9-8ff7-d53741dc928c}@{0}",tenant));
+				requestMessage.Headers.TryAddWithoutValidation("X-AnchorMailbox", @"UPN:SystemMailbox{bb558c35-97f1-4cb9-8ff7-d53741dc928c}@"+onMicrosoft);
 
 				try
 				{
-					requestMessage.Content = new StringContent(JsonSerializer.Serialize(body));
+					requestMessage.Content = new StringContent(JsonSerializer.Serialize(exoBody));
 					requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
 					HttpResponseMessage responseMessage = await SendHttpRequest(requestMessage);
@@ -720,6 +816,17 @@ namespace CIPP_API_ALT.Common
         {
 			return await _httpClient.SendAsync(requestMessage);
 		}
+
+		public struct CmdletBody
+        {
+			public CmdletInput CmdletInput { get; set; }
+		}
+
+		public struct CmdletInput
+        {
+			public string CmdletName { get; set; }
+			public object Parameters { get; set;  }
+        }
 		#endregion
 
 		#region Private Methods

@@ -109,7 +109,7 @@ namespace CIPP_API_ALT.Common
                     continue;
                 }
 
-                returnData.Add((type)Activator.CreateInstance(typeof(type), line.Split(",")));
+                returnData.Add((type)Activator.CreateInstance(typeof(type), line.Split(',')));
             }
 
             return returnData;

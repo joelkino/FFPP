@@ -35,16 +35,13 @@ namespace CIPP_API_ALT.Api.v10.Tenants
 			}
 
 			List<JsonElement> domainsRaw = await RequestHelper.NewGraphGetRequest("https://graph.microsoft.com/beta/domains", tenantFilter);
-			List<Domain[]> domainsArrayList = Utilities.ParseJson<Domain[]>(domainsRaw);
+			List<Domain> domainsArrayList = Utilities.ParseJson<Domain>(domainsRaw);
 
-			foreach (Domain[] domainArray in domainsArrayList)
+			foreach (Domain dom in domainsArrayList)
 			{
-				foreach (Domain dom in domainArray)
-				{
-					outDomains.Add(dom);
-				}
+				outDomains.Add(dom);
 			}
-
+			
 			return outDomains.OrderBy(x => x.isDefault).ToList();
 		}
 

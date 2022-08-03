@@ -1,4 +1,5 @@
 ﻿using CurrentApi = CIPP_API_ALT.Api.v10;
+using CIPP_API_ALT.Data.Logging;
 using CIPP_API_ALT.Common;
 
 namespace CIPP_API_ALT.Api
@@ -25,8 +26,26 @@ namespace CIPP_API_ALT.Api
             /// </summary>
             app.MapGet(string.Format("/{0}/GetDashboard", ApiEnvironment.ApiHeader), async (HttpContext context, HttpRequest request) =>
             {
-                string accessingUser = request.Headers["x-ms-client-principal"];
-                return await CurrentApi.Routes.GetDashboard(context, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await CurrentApi.Routes.GetDashboard(context, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
             .WithName(string.Format("/{0}/GetDashboard", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
 
@@ -35,8 +54,26 @@ namespace CIPP_API_ALT.Api
             /// </summary>
             app.MapGet(string.Format("/{0}/GetVersion", ApiEnvironment.ApiHeader), async (HttpContext context, HttpRequest request, string LocalVersion) =>
             {
-                string accessingUser = request.Headers["x-ms-client-principal"];
-                return await CurrentApi.Routes.GetVersion(context, LocalVersion, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await CurrentApi.Routes.GetVersion(context, LocalVersion, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
             .WithName(string.Format("/{0}/GetVersion", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
 
@@ -54,38 +91,167 @@ namespace CIPP_API_ALT.Api
             /// </summary>
             app.MapGet(string.Format("/{0}/ListDomains", ApiEnvironment.ApiHeader), async (HttpContext context, HttpRequest request, string TenantFilter) =>
             {
-                string accessingUser = request.Headers["x-ms-client-principal"];
-                return await CurrentApi.Routes.ListDomains(context, TenantFilter, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await CurrentApi.Routes.ListDomains(context, TenantFilter, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
-            .WithName(string.Format("/{0}/ListDomains", ApiEnvironment.ApiHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+            .WithName(string.Format("/{0}/ListDomains", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
+
+            /// <summary>
+            /// /api/ListSites
+            /// </summary>
+            app.MapGet("/{0}/ListSites", async (HttpContext context, HttpRequest request, string TenantFilter, string Type, string? UserUPN) =>
+            {
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await CurrentApi.Routes.ListSites(context, TenantFilter, Type, UserUPN ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
+
+            })
+            .WithName(string.Format("/{0}/ListSites", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
 
             /// <summary>
             /// /api/ListTenants
             /// </summary>
             app.MapGet(string.Format("/{0}/ListTenants", ApiEnvironment.ApiHeader) , async (HttpContext context, HttpRequest request, bool? AllTenantSelector) =>
             {
-                string accessingUser = request.Headers["x-ms-client-principal"];
-                return await CurrentApi.Routes.ListTenants(context, AllTenantSelector ?? false, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await CurrentApi.Routes.ListTenants(context, AllTenantSelector ?? false, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
-            .WithName(string.Format("/{0}/ListTenants", ApiEnvironment.ApiHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+            .WithName(string.Format("/{0}/ListTenants", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
 
             /// <summary>
             /// /api/ListUserConditionalAccessPolicies
             /// </summary>
             app.MapGet(string.Format("/{0}/ListUserConditionalAccessPolicies", ApiEnvironment.ApiHeader), async (HttpContext context, HttpRequest request, string TenantFilter, string UserId) =>
             {
-                string accessingUser = request.Headers["x-ms-client-principal"];
-                return await CurrentApi.Routes.ListUserConditionalAccessPolicies(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await CurrentApi.Routes.ListUserConditionalAccessPolicies(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
             .WithName(string.Format("/{0}/ListUserConditionalAccessPolicies", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
+
+            /// <summary>
+            /// /api/ListUserMailboxDetails
+            /// </summary>
+            app.MapGet(string.Format("/{0}/ListUserMailboxDetails", ApiEnvironment.ApiHeader), async (HttpContext context, HttpRequest request, string TenantFilter, string UserId) =>
+            {
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await CurrentApi.Routes.ListUserMailboxDetails(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
+            })
+            .WithName(string.Format("/{0}/ListUserMailboxDetails", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
 
             /// <summary>
             /// /api/ListUsers
             /// </summary>
             app.MapGet(string.Format("/{0}/ListUsers", ApiEnvironment.ApiHeader), async (HttpContext context, HttpRequest request, string TenantFilter, string? UserId) =>
             {
-                var accessingUser = request.Headers["x-ms-client-principal"];
-                return await CurrentApi.Routes.ListUsers(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await CurrentApi.Routes.ListUsers(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
             })
             .WithName(string.Format("/{0}/ListUsers", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
             #endregion
