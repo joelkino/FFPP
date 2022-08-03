@@ -3,6 +3,7 @@ using CIPP_API_ALT.Common;
 using CIPP_API_ALT.Data.Logging;
 using CIPP_API_ALT.Api.v10.Dashboards;
 using CIPP_API_ALT.Api.v10.Users;
+using CIPP_API_ALT.Api.v10.Devices;
 using CIPP_API_ALT.Api.v10.Tenants;
 
 namespace CIPP_API_ALT.Api.v10
@@ -205,6 +206,34 @@ namespace CIPP_API_ALT.Api.v10
             .WithName(string.Format("/{0}/ListUserConditionalAccessPolicies", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
+            /// /v1.0/ListUserDevices
+            /// </summary>
+            app.MapGet("/v{version:apiVersion}/ListUserDevices", async (HttpContext context, HttpRequest request, string TenantFilter, string UserId) =>
+            {
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await ListUserDevices(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
+            })
+            .WithName(string.Format("/{0}/ListUserDevices", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+
+            /// <summary>
             /// /v1.0/ListUserMailboxDetails
             /// </summary>
             app.MapGet("/v{version:apiVersion}/ListUserMailboxDetails", async (HttpContext context, HttpRequest request, string TenantFilter, string UserId) =>
@@ -315,6 +344,16 @@ namespace CIPP_API_ALT.Api.v10
             }
 
             return await User.GetUserConditionalAccessPolicies(TenantFilter, UserId ?? string.Empty, accessingUser);
+        }
+
+        public static async Task<object> ListUserDevices(HttpContext context, string TenantFilter, string UserId, string accessingUser)
+        {
+            if (!ApiEnvironment.CippCompatibilityMode)
+            {
+                CheckUserIsReader(context);
+            }
+
+            return await Device.GetUserDevices(TenantFilter, UserId ?? string.Empty, accessingUser);
         }
 
         public static async Task<object> ListUserMailboxDetails(HttpContext context, string TenantFilter, string UserId, string accessingUser)

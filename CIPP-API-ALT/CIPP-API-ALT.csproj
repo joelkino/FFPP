@@ -38,6 +38,7 @@
     <Folder Include="Versions\api\" />
     <Folder Include="Versions\api\v1.0\" />
     <Folder Include="Versions\api\v1.1\" />
+    <Folder Include="Versions\api\v1.0\Devices\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="System.IdentityModel.Tokens.Jwt" />
@@ -56,6 +57,7 @@
     <None Remove="Versions\api\" />
     <None Remove="Versions\api\v1.0\" />
     <None Remove="Versions\api\v1.1\" />
+    <None Remove="Versions\api\v1.0\Devices\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\" />
