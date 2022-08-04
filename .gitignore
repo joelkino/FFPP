@@ -361,6 +361,11 @@ MigrationBackup/
 */Cache/*
 tenants.cache.json
 
+# Potentially sensitive configuration (not secrets)
+apizeroconf.json
+api.zeroconf.json
+api.zero.conf.json
+
 # macOS
 .DS_Store
 */.DS_Store
