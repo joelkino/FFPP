@@ -38,7 +38,6 @@
     <Folder Include="Versions\api\" />
     <Folder Include="Versions\api\v1.0\" />
     <Folder Include="Versions\api\v1.1\" />
-    <Folder Include="Versions\api\v1.0\Devices\" />
     <Folder Include="Data\Cache\Pre-Fetch\" />
     <Folder Include="Data\Cache\Pre-Fetch\Users\" />
   </ItemGroup>
@@ -59,7 +58,6 @@
     <None Remove="Versions\api\" />
     <None Remove="Versions\api\v1.0\" />
     <None Remove="Versions\api\v1.1\" />
-    <None Remove="Versions\api\v1.0\Devices\" />
     <None Remove="Data\Cache\Pre-Fetch\" />
     <None Remove="Data\Cache\Pre-Fetch\Users\" />
   </ItemGroup>
@@ -72,10 +70,6 @@
   <ItemGroup>
     <None Include="wwwroot\Swagger-Customisation\Swagger-Customisation.css" />
     <None Include="..\.editorconfig" />
-    <None Include="Data\Cache\tenants.cache.json" Condition="'$(ExcludeConfigFilesFromBuildOutput)'!='true'">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\ConversionTable.csv">

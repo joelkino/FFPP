@@ -3,7 +3,6 @@ using CIPP_API_ALT.Common;
 using CIPP_API_ALT.Data.Logging;
 using CIPP_API_ALT.Api.v10.Dashboards;
 using CIPP_API_ALT.Api.v10.Users;
-using CIPP_API_ALT.Api.v10.Devices;
 using CIPP_API_ALT.Api.v10.Tenants;
 
 namespace CIPP_API_ALT.Api.v10
@@ -407,7 +406,7 @@ namespace CIPP_API_ALT.Api.v10
                 CheckUserIsReader(context);
             }
 
-            return await Device.GetUserDevices(TenantFilter, UserId ?? string.Empty, accessingUser);
+            return await User.GetUserDevices(TenantFilter, UserId ?? string.Empty, accessingUser);
         }
 
         public static async Task<object> ListUserGroups(HttpContext context, string TenantFilter, string UserId, string accessingUser)

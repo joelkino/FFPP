@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Dynamic;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using CIPP_API_ALT.Data.Logging;
@@ -61,7 +62,6 @@ namespace CIPP_API_ALT.Common
             foreach (JsonElement je in rawJson)
             {   
                 objectArrayList.Add(JsonSerializer.Deserialize<type>(je, options));
-
             }
 
             return objectArrayList;
@@ -114,6 +114,25 @@ namespace CIPP_API_ALT.Common
             }
 
             return returnData;
+        }
+
+        /// <summary>
+        /// Evaluates JSON boolean and treats null as false
+        /// </summary>
+        /// <param name="property">JSON boolean to check</param>
+        /// <returns>true/false</returns>
+        public static bool NullIsFalse(JsonElement property)
+        {
+            try
+            {
+                return property.GetBoolean();
+            }
+            catch
+            {
+
+            }
+
+            return false;
         }
 
         /// <summary>

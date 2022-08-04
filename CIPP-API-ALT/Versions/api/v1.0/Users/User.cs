@@ -3,6 +3,7 @@ using System.Text.Json;
 using CIPP_API_ALT.Common;
 using CIPP_API_ALT.Data.Logging;
 using CIPP_API_ALT.Api.v10.Licenses;
+using System.Text.Json.Serialization;
 
 namespace CIPP_API_ALT.Api.v10.Users
 {
@@ -197,15 +198,15 @@ namespace CIPP_API_ALT.Api.v10.Users
         /// </summary>
         /// <param name="tenantFilter"></param>
         /// <param name="userId"></param>
-        /// <param name="httpCookieUser"></param>
+        /// <param name="accessingUser"></param>
         /// <returns></returns>
-        public static async Task<List<ConditionalAccessPolicy>> GetUserConditionalAccessPolicies(string tenantFilter, string userId, string httpCookieUser = "")
+        public static async Task<List<ConditionalAccessPolicy>> GetUserConditionalAccessPolicies(string tenantFilter, string userId, string accessingUser = "")
         {
             List<ConditionalAccessPolicy> policies = new();
 
             using (CippLogs logsDb = new())
             {
-                await logsDb.LogRequest("Accessed this API", httpCookieUser, "Debug", "", "ListUsers");
+                await logsDb.LogRequest("Accessed this API", accessingUser, "Debug", "", "ListUsers");
             }
 
             List<JsonElement> capArrays;
@@ -248,13 +249,13 @@ namespace CIPP_API_ALT.Api.v10.Users
         /// <param name="tenantFilter"></param>
         /// <param name="type"></param>
         /// <param name="userUpn"></param>
-        /// <param name="httpCookieUser"></param>
+        /// <param name="accessingUser"></param>
         /// <returns></returns>
-        public async static Task<List<OneDriveSiteReport>> GetSites(string tenantFilter, string type, string userUpn, string httpCookieUser = "")
+        public async static Task<List<OneDriveSiteReport>> GetSites(string tenantFilter, string type, string userUpn, string accessingUser = "")
         {
             using (CippLogs logsDb = new())
             {
-                await logsDb.LogRequest("Accessed this API", httpCookieUser, "Debug", "", "ListSites");
+                await logsDb.LogRequest("Accessed this API", accessingUser, "Debug", "", "ListSites");
             }
             var report = await RequestHelper.NewGraphGetRequestString(string.Format("https://graph.microsoft.com/beta/reports/get{0}Detail(period='D7')", type), tenantFilter);
             string filename = ApiEnvironment.CacheDir + "/" + string.Format("/site.report.{0}.{1}", DateTime.UtcNow.ToString("yyMMddhhmmss"), userUpn);
@@ -297,7 +298,7 @@ namespace CIPP_API_ALT.Api.v10.Users
 
             Task<List<JsonElement>> casResponseTask = RequestHelper.NewGraphGetRequest(string.Format("https://outlook.office365.com/adminapi/beta/{0}/CasMailbox('{1}')", tenantFilter, userId), tenantFilter, "exchangeonline", noPagination: true);
             List<JsonElement> mailResponse = await RequestHelper.NewGraphGetRequest(string.Format("https://outlook.office365.com/adminapi/beta/{0}/Mailbox('{1}')", tenantFilter, userId), tenantFilter, "exchangeonline", noPagination: true);
-            string email = mailResponse[0].GetProperty("PrimarySmtpAddress").GetString() ?? string.Empty;
+            string? email = mailResponse[0].GetProperty("PrimarySmtpAddress").GetString();
             Task<JsonElement> mailboxDetailedRequest = RequestHelper.NewExoRequest(tenantFilter, "Get-Mailbox", JsonSerializer.Deserialize<JsonElement>(@"{""anr"":""" + email + @"""}"));
             Task<JsonElement> blockedSender = RequestHelper.NewExoRequest(tenantFilter, "Get-BlockedSenderAddress", JsonSerializer.Deserialize<JsonElement>(@"{""SenderAddress"":""" + email + @"""}"));
 
@@ -435,6 +436,13 @@ namespace CIPP_API_ALT.Api.v10.Users
             return outLogs;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tenantFilter"></param>
+        /// <param name="userId"></param>
+        /// <param name="accessingUser"></param>
+        /// <returns></returns>
         public static async Task<List<UserGroup>> GetUserGroups(string tenantFilter, string userId, string accessingUser)
         {
             using (CippLogs logsDb = new())
@@ -442,10 +450,101 @@ namespace CIPP_API_ALT.Api.v10.Users
                 await logsDb.LogRequest("Accessed this API", accessingUser, "Debug", "", "ListUserGroups");
             }
 
-            List<JsonElement> rawGroups = await RequestHelper.NewGraphGetRequest(
-                string.Format("https://graph.microsoft.com/beta/users/{0}/memberOf/$/microsoft.graph.group?$select=id,displayName,mailEnabled,securityEnabled,groupTypes,onPremisesSyncEnabled,mail,isAssignableToRole&$orderby=displayName asc", userId), tenantFilter, noPagination: true);
-            List<UserGroup>  groups = Utilities.ParseJson<UserGroup>(rawGroups);
-            return groups;
+            List<JsonElement> rawGroups = await RequestHelper.NewGraphGetRequest(string.Format("https://graph.microsoft.com/beta/users/{0}/memberOf/$/microsoft.graph.group?$select=id,displayName,mailEnabled,securityEnabled,groupTypes,onPremisesSyncEnabled,mail,isAssignableToRole&$orderby=displayName asc", userId), tenantFilter, noPagination: true);
+
+            return Utilities.ParseJson<UserGroup>(rawGroups);
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tenantFilter"></param>
+        /// <param name="userId"></param>
+        /// <param name="accessingUser"></param>
+        /// <returns></returns>
+        public static async Task<List<UserDevice>> GetUserDevices(string tenantFilter, string userId, string accessingUser = "")
+        {
+            List<UserDevice> userDevices = new();
+
+            using (CippLogs logsDb = new())
+            {
+                await logsDb.LogRequest("Accessed this API", accessingUser, "Debug", "", "ListUserDevices");
+            }
+
+            string? GetEpmId(string deviceId, List<JsonElement> epmDevices)
+            {
+                try
+                {
+                    return epmDevices.Find(x => x.GetProperty("azureADDeviceId").GetString().ToLower().Equals(deviceId.ToLower())).GetProperty("id").GetString();
+                }
+                catch
+                {
+
+                }
+
+                return null;
+            }
+
+            try
+            {
+                var epmDevices = RequestHelper.NewGraphGetRequest(string.Format("https://graph.microsoft.com/beta/users/{0}/managedDevices", userId), tenantFilter);
+                var devices = await RequestHelper.NewGraphGetRequest(string.Format("https://graph.microsoft.com/beta/users/{0}/ownedDevices?$top=999", userId), tenantFilter);
+
+                foreach (JsonElement j in devices)
+                {
+                    string? epmId = GetEpmId(j.GetProperty("deviceId").GetString(), epmDevices.Result);
+
+                    UserDevice ud = new()
+                    {
+                        ID = j.GetProperty("id").GetString(),
+                        accountEnabled = j.GetProperty("accountEnabled").GetBoolean(),
+                        approximateLastSignInDateTime = j.GetProperty("approximateLastSignInDateTime").GetString(),
+                        createdDateTime = j.GetProperty("createdDateTime").GetString(),
+                        deviceOwnership = j.GetProperty("deviceOwnership").GetString(),
+                        displayName = j.GetProperty("displayName").GetString(),
+                        enrollmentType = j.GetProperty("enrollmentType").GetString(),
+                        isCompliant = Utilities.NullIsFalse(j.GetProperty("isCompliant")),
+                        managementType = j.GetProperty("managementType").GetString(),
+                        manufacturer = j.GetProperty("manufacturer").GetString(),
+                        model = j.GetProperty("model").GetString(),
+                        operatingSystem = j.GetProperty("operatingSystem").GetString(),
+                        onPremisesSyncEnabled = Utilities.NullIsFalse(j.GetProperty("onPremisesSyncEnabled")),
+                        operatingSystemVersion = j.GetProperty("operatingSystemVersion").GetString(),
+                        trustType = j.GetProperty("trustType").GetString(),
+                        EPMID = epmId
+                    };
+
+                    userDevices.Add(ud);
+                }
+            }
+            catch(Exception ex)
+            {
+                CippLogs.DebugConsoleWrite(string.Format("Exception in ListUserDevices: {0} Inner Exception: {1}", ex.Message, ex.InnerException.Message ?? string.Empty));
+                throw;
+            }
+
+            return userDevices;
+        }
+
+        public struct UserDevice
+        {
+            public string? ID { get; set; }
+            public bool? accountEnabled { get; set; }
+            public string? approximateLastSignInDateTime { get; set; }
+            public string? createdDateTime { get; set; }
+            public string? deviceOwnership { get; set; }
+            public string? displayName { get; set; }
+            public string? enrollmentType { get; set; }
+            public bool? isCompliant { get; set; }
+            public string? managementType { get; set; }
+            public string? manufacturer { get; set; }
+            public string? model { get; set; }
+            public string? operatingSystem { get; set; }
+            public bool? onPremisesSyncEnabled { get; set; }
+            public string? operatingSystemVersion { get; set; }
+            public string? trustType { get; set; }
+            public string? EPMID { get; set; }
         }
 
         public struct UserGroup
@@ -454,7 +553,8 @@ namespace CIPP_API_ALT.Api.v10.Users
             public string? DisplayName { get; set; }
             public bool? MailEnabled { get; set; }
             public string? Mail { get; set; }
-            public bool? SecurityGroup { get; set; }
+            public bool? SecurityGroup { get { return SecurityEnabled; } }
+            private bool? SecurityEnabled { get; set; }
             public string[]? GroupTypes { get; set; }
             public bool? OnPremisesSync { get; set; }
             public bool? IsAssignableToRole { get; set; }
