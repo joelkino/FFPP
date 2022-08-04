@@ -24,6 +24,8 @@ namespace CIPP_API_ALT.Common
         public static readonly string DataDir = WorkingDir + "/Data";
         public static readonly string DatabaseDir = DataDir + "/SQLite";
         public static readonly string CacheDir = DataDir + "/Cache";
+        public static readonly string PreFetchDir = CacheDir + "/Pre-Fetch";
+        public static readonly string UsersPreFetchDir = PreFetchDir + "/Users";
         public static readonly string CachedTenantsFile = WorkingDir + "/Data/Cache/tenants.cache.json";
         public static readonly string LicenseConversionTableFile = WorkingDir + "/Data/ConversionTable.csv";
         public static readonly string LicenseConversionTableMisfitsFile = WorkingDir + "/Data/ConversionTableMisfits.csv";
@@ -47,12 +49,20 @@ namespace CIPP_API_ALT.Common
         public static bool UseHttpsRedirect { get; set; }
 
         /// <summary>
-        /// Build data directories if they don't exist
+        /// Build data directories (including cache directories) if they don't exist
         /// </summary>
-        public static void DataDirectoryBuild()
+        public static void DataDirectoriesBuild()
         {
-            Directory.CreateDirectory(ApiEnvironment.CacheDir);
-            Directory.CreateDirectory(ApiEnvironment.DatabaseDir);
+            Directory.CreateDirectory(DatabaseDir);
+            CacheDirectoriesBuild();
+        }
+
+        /// <summary>
+        /// Build cache directories if they don't exist
+        /// </summary>
+        public static void CacheDirectoriesBuild()
+        {
+            Directory.CreateDirectory(UsersPreFetchDir);
         }
 
         /// <summary>

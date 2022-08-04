@@ -94,7 +94,7 @@ namespace CIPP_API_ALT.Api.v10.Users
                 returnUsers[i].LicJoined = string.Empty;
                 returnUsers[i].primDomain = returnUsers[i].userPrincipalName.Split("@")[1] ?? string.Empty;
 
-                foreach(assignedLicence al in returnUsers[i].assignedLicenses)
+                foreach (assignedLicence al in returnUsers[i].assignedLicenses)
                 {
                     if (!string.IsNullOrEmpty(al.skuId))
                     {
@@ -127,15 +127,15 @@ namespace CIPP_API_ALT.Api.v10.Users
 
             }
 
-            if(!string.IsNullOrEmpty(userId))
+            if (!string.IsNullOrEmpty(userId))
             {
-                HttpRequestMessage requestMessage = new(HttpMethod.Post,string.Format("https://login.microsoftonline.com/{0}/oauth2/token",tenantFilter));
+                HttpRequestMessage requestMessage = new(HttpMethod.Post, string.Format("https://login.microsoftonline.com/{0}/oauth2/token", tenantFilter));
                 requestMessage.Content = new StringContent(string.Format("resource=https://admin.microsoft.com&grant_type=refresh_token&refresh_token={0}", ApiEnvironment.Secrets.ExchangeRefreshToken));
                 requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
                 HttpResponseMessage responseMessage = await RequestHelper.SendHttpRequest(requestMessage);
 
-                if(responseMessage.IsSuccessStatusCode)
+                if (responseMessage.IsSuccessStatusCode)
                 {
                     JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(await responseMessage.Content.ReadAsByteArrayAsync()));
                     string accessToken = jsonDoc.RootElement.GetProperty("access_token").GetString() ?? "FAILED_TO_GET_ACCESS_TOKEN";
@@ -149,7 +149,7 @@ namespace CIPP_API_ALT.Api.v10.Users
 
                     responseMessage = await RequestHelper.SendHttpRequest(requestMessage);
 
-                    if(responseMessage.IsSuccessStatusCode)
+                    if (responseMessage.IsSuccessStatusCode)
                     {
                         try
                         {
@@ -213,10 +213,10 @@ namespace CIPP_API_ALT.Api.v10.Users
 
             try
             {
-                object json = JsonSerializer.Deserialize<object>(@"{""conditions"":{""users"":{""allUsers"":2,""included"":{""userIds"":[""" +userId+@"""],""groupIds"":[]},""excluded"":{""userIds"":[],""groupIds"":[]}},""servicePrincipals"":{""allServicePrincipals"":1,""includeAllMicrosoftApps"":false,""excludeAllMicrosoftApps"":false,""userActions"":[],""stepUpTags"":[]},""conditions"":{""minUserRisk"":{""noRisk"":false,""lowRisk"":false,""mediumRisk"":false,""highRisk"":false,""applyCondition"":false},""minSigninRisk"":{""noRisk"":false,""lowRisk"":false,""mediumRisk"":false,""highRisk"":false,""applyCondition"":false},""servicePrincipalRiskLevels"":{""noRisk"":false,""lowRisk"":false,""mediumRisk"":false,""highRisk"":false,""applyCondition"":false},""devicePlatforms"":{""all"":2,""included"":{""android"":false,""ios"":false,""windowsPhone"":false,""windows"":false,""macOs"":false,""linux"":false},""excluded"":null,""applyCondition"":false},""locations"":{""applyCondition"":true,""includeLocationType"":2,""excludeAllTrusted"":false},""clientApps"":{""applyCondition"":false,""specificClientApps"":false,""webBrowsers"":false,""exchangeActiveSync"":false,""onlyAllowSupportedPlatforms"":false,""mobileDesktop"":false},""clientAppsV2"":{""applyCondition"":false,""webBrowsers"":false,""mobileDesktop"":false,""modernAuth"":false,""exchangeActiveSync"":false,""onlyAllowSupportedPlatforms"":false,""otherClients"":false},""deviceState"":{""includeDeviceStateType"":1,""excludeDomainJoionedDevice"":false,""excludeCompliantDevice"":false,""applyCondition"":true}}},""country"":"""",""device"":{}}");
+                object json = JsonSerializer.Deserialize<object>(@"{""conditions"":{""users"":{""allUsers"":2,""included"":{""userIds"":[""" + userId + @"""],""groupIds"":[]},""excluded"":{""userIds"":[],""groupIds"":[]}},""servicePrincipals"":{""allServicePrincipals"":1,""includeAllMicrosoftApps"":false,""excludeAllMicrosoftApps"":false,""userActions"":[],""stepUpTags"":[]},""conditions"":{""minUserRisk"":{""noRisk"":false,""lowRisk"":false,""mediumRisk"":false,""highRisk"":false,""applyCondition"":false},""minSigninRisk"":{""noRisk"":false,""lowRisk"":false,""mediumRisk"":false,""highRisk"":false,""applyCondition"":false},""servicePrincipalRiskLevels"":{""noRisk"":false,""lowRisk"":false,""mediumRisk"":false,""highRisk"":false,""applyCondition"":false},""devicePlatforms"":{""all"":2,""included"":{""android"":false,""ios"":false,""windowsPhone"":false,""windows"":false,""macOs"":false,""linux"":false},""excluded"":null,""applyCondition"":false},""locations"":{""applyCondition"":true,""includeLocationType"":2,""excludeAllTrusted"":false},""clientApps"":{""applyCondition"":false,""specificClientApps"":false,""webBrowsers"":false,""exchangeActiveSync"":false,""onlyAllowSupportedPlatforms"":false,""mobileDesktop"":false},""clientAppsV2"":{""applyCondition"":false,""webBrowsers"":false,""mobileDesktop"":false,""modernAuth"":false,""exchangeActiveSync"":false,""onlyAllowSupportedPlatforms"":false,""otherClients"":false},""deviceState"":{""includeDeviceStateType"":1,""excludeDomainJoionedDevice"":false,""excludeCompliantDevice"":false,""applyCondition"":true}}},""country"":"""",""device"":{}}");
                 foreach (JsonElement j in (await RequestHelper.NewClassicApiPostRequest(tenantFilter, "https://main.iam.ad.ext.azure.com/api/Policies/Evaluate?", HttpMethod.Post, json, "74658136-14ec-4630-ad9b-26e160ff0fc6")).EnumerateArray())
                 {
-                    if(j.GetProperty("applied").GetBoolean())
+                    if (j.GetProperty("applied").GetBoolean())
                     {
                         userPolicies.Add(j);
                     }
@@ -231,7 +231,7 @@ namespace CIPP_API_ALT.Api.v10.Users
                 capArrays = new();
             }
 
-            foreach ( JsonElement cap in capArrays)
+            foreach (JsonElement cap in capArrays)
             {
                 if (userPolicies.FindAll(x => x.GetProperty("policyId").GetString().Equals(cap.GetProperty("id").GetString())).Count >= 1)
                 {
@@ -256,13 +256,13 @@ namespace CIPP_API_ALT.Api.v10.Users
             {
                 await logsDb.LogRequest("Accessed this API", httpCookieUser, "Debug", "", "ListSites");
             }
-            var report = await RequestHelper.NewGraphGetRequestString(string.Format("https://graph.microsoft.com/beta/reports/get{0}Detail(period='D7')",type),tenantFilter);
+            var report = await RequestHelper.NewGraphGetRequestString(string.Format("https://graph.microsoft.com/beta/reports/get{0}Detail(period='D7')", type), tenantFilter);
             string filename = ApiEnvironment.CacheDir + "/" + string.Format("/site.report.{0}.{1}", DateTime.UtcNow.ToString("yyMMddhhmmss"), userUpn);
-            await File.WriteAllTextAsync(filename,report);
+            await File.WriteAllTextAsync(filename, report);
 
             List<OneDriveSiteReport> outRes = Utilities.CsvToObjectList<OneDriveSiteReport>(filename, true);
 
-            if(!userUpn.Equals(string.Empty))
+            if (!userUpn.Equals(string.Empty))
             {
                 outRes = new() { outRes.Find(x => x.UPN.ToLower().Equals(userUpn.ToLower())) };
             }
@@ -301,7 +301,7 @@ namespace CIPP_API_ALT.Api.v10.Users
             Task<JsonElement> mailboxDetailedRequest = RequestHelper.NewExoRequest(tenantFilter, "Get-Mailbox", JsonSerializer.Deserialize<JsonElement>(@"{""anr"":""" + email + @"""}"));
             Task<JsonElement> blockedSender = RequestHelper.NewExoRequest(tenantFilter, "Get-BlockedSenderAddress", JsonSerializer.Deserialize<JsonElement>(@"{""SenderAddress"":""" + email + @"""}"));
 
-            if(blockedSender.Result.GetArrayLength()>0)
+            if (blockedSender.Result.GetArrayLength() > 0)
             {
                 blockedForSpam = true;
             }
@@ -316,24 +316,24 @@ namespace CIPP_API_ALT.Api.v10.Users
                 string perms = string.Empty;
 
                 JsonElement[]? raw = j.GetProperty("PermissionList").EnumerateArray().ToArray();
-                foreach(JsonElement j2 in raw)
+                foreach (JsonElement j2 in raw)
                 {
-                    JsonElement[] j3 =  j2.GetProperty("AccessRights").EnumerateArray().ToArray();
-                    foreach(JsonElement j4 in j3)
+                    JsonElement[] j3 = j2.GetProperty("AccessRights").EnumerateArray().ToArray();
+                    foreach (JsonElement j4 in j3)
                     {
-                        perms+=j4.GetString()+", ";
+                        perms += j4.GetString() + ", ";
                     }
                 }
-                MailboxUserPermissions permission = new MailboxUserPermissions() { User = j.GetProperty("User").GetString() ?? string.Empty, AccessRights = perms.TrimEnd(',',' ') };
+                MailboxUserPermissions permission = new MailboxUserPermissions() { User = j.GetProperty("User").GetString() ?? string.Empty, AccessRights = perms.TrimEnd(',', ' ') };
                 userPerms.Add(permission);
             }
 
             JsonElement mDr = mailboxDetailedRequest.Result[0];
 
             string? forwardingAddress = string.Empty;
-             
+
             if (!string.IsNullOrEmpty(mDr.GetProperty("ForwardingSmtpAddress").GetString()) &&
-                !string.IsNullOrEmpty(mDr.GetProperty("ForwardingAddress").GetString())) 
+                !string.IsNullOrEmpty(mDr.GetProperty("ForwardingAddress").GetString()))
             {
                 forwardingAddress = mDr.GetProperty("ForwardingAddress").GetString() + ' ' +
                     mDr.GetProperty("ForwardingSmtpAddress").GetString();
@@ -374,6 +374,88 @@ namespace CIPP_API_ALT.Api.v10.Users
             };
         }
 
+        public static async Task<List<UserSigninLog>> GetUserSigninLogs(string tenantFilter, string userId, string accessingUser)
+        {
+            List<UserSigninLog> outLogs = new();
+
+            using (CippLogs logsDb = new())
+            {
+                await logsDb.LogRequest("Accessed this API", accessingUser, "Debug", "", "ListUserSigninLogs");
+            }
+
+            List<JsonElement> logs = await RequestHelper.NewGraphGetRequest(string.Format("https://graph.microsoft.com/beta/auditLogs/signIns?$filter=(userId eq '{0}')&$top=50&$orderby=createdDateTime desc", userId), tenantFilter, noPagination: true);
+
+            foreach (JsonElement j in logs)
+            {
+                List<AppliedCAP> appliedCaps = new();
+
+                int loginStatus = j.GetProperty("status").GetProperty("errorCode").GetInt32();
+                string overallLoginStatus = "Failed";
+
+                if ((loginStatus == 0) && (j.GetProperty("conditionalAccessStatus").GetString().ToLower().Equals("success") || j.GetProperty("conditionalAccessStatus").GetString().ToLower().Equals("not applied")))
+                {
+                    overallLoginStatus = "Success";
+                }
+
+                foreach (JsonElement je in j.GetProperty("appliedConditionalAccessPolicies").EnumerateArray())
+                {
+                    appliedCaps.Add(new() { Result = je.GetProperty("result").GetString(), Name = je.GetProperty("displayName").GetString() });
+                }
+
+                outLogs.Add(new()
+                {
+                    Date = j.GetProperty("createdDateTime").GetString().TrimEnd('\r', '\n'),
+                    id = j.GetProperty("id").GetString(),
+                    Application = j.GetProperty("resourceDisplayName").GetString(),
+                    LoginStatus = loginStatus,
+                    ConditionalAccessStatus = j.GetProperty("conditionalAccessStatus").GetString(),
+                    OverallLoginStatus = overallLoginStatus,
+                    IPAddress = j.GetProperty("ipAddress").GetString(),
+                    Town = j.GetProperty("location").GetProperty("city").GetString(),
+                    State = j.GetProperty("location").GetProperty("state").GetString(),
+                    Country = j.GetProperty("location").GetProperty("countryOrRegion").GetString(),
+                    Device = j.GetProperty("deviceDetail").GetProperty("displayName").GetString(),
+                    DeviceCompliant = j.GetProperty("deviceDetail").GetProperty("isCompliant").GetBoolean(),
+                    OS = j.GetProperty("deviceDetail").GetProperty("operatingSystem").GetString(),
+                    Browser = j.GetProperty("deviceDetail").GetProperty("browser").GetString(),
+                    AppliedCAPs = appliedCaps,
+                    AdditionalDetails = j.GetProperty("status").GetProperty("additionalDetails").GetString(),
+                    FailureReason = j.GetProperty("status").GetProperty("failureReason").GetString(),
+                    FullDetails = j
+                });
+            }
+
+            return outLogs;
+        }
+
+        public struct UserSigninLog
+        {
+            public string? Date { get; set; }
+            public string? id { get; set; }
+            public string? Application { get; set; }
+            public int? LoginStatus { get; set; }
+            public string? ConditionalAccessStatus { get; set; }
+            public string? OverallLoginStatus { get; set; }
+            public string? IPAddress { get; set; }
+            public string? Town { get; set; }
+            public string? State { get; set; }
+            public string? Country { get; set; }
+            public string? Device { get; set; }
+            public bool? DeviceCompliant { get; set; }
+            public string? OS { get; set; }
+            public string? Browser { get; set; }
+            public List<AppliedCAP> AppliedCAPs { get; set; }
+            public string? AdditionalDetails { get; set; }
+            public string? FailureReason { get; set; }
+            public JsonElement FullDetails { get; set; }
+        }
+
+        public struct AppliedCAP
+        {
+            public string? Result { get; set; }
+            public string? Name { get; set; }
+        }
+        
         public struct UserMailboxDetails
         {
             public bool? ForwardAndDeliver { get; set; }
@@ -446,8 +528,8 @@ namespace CIPP_API_ALT.Api.v10.Users
 
         public struct ConditionalAccessPolicy
         {
-            public string id { get; set; }
-            public string displayName { get; set; }
+            public string? id { get; set; }
+            public string? displayName { get; set; }
         }
     }
 

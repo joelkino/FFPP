@@ -54,7 +54,8 @@ namespace CIPP_API_ALT.Common
 
             JsonSerializerOptions options = new()
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,
+                MaxDepth = 64
             };
 
             foreach (JsonElement je in rawJson)
@@ -116,15 +117,17 @@ namespace CIPP_API_ALT.Common
         }
 
         /// <summary>
-        /// Deletes cache files used by CIPP API ALT
+        /// Deletes cache and pre-fetch files used by CIPP API ALT
         /// </summary>
         /// <returns>Boolean indicating sucess or failure</returns>
         public static async Task<bool> RemoveCippCache()
         {
             try
             {
-                // Delete tenants.cache.json
-                File.Delete(ApiEnvironment.CachedTenantsFile);
+                // Delete CacheDir and any subdirs/files then re-create cache dir
+                Directory.Delete(ApiEnvironment.CacheDir, true);
+                ApiEnvironment.CacheDirectoriesBuild();
+
             }
             catch (Exception ex)
             {

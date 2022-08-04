@@ -262,6 +262,33 @@ namespace CIPP_API_ALT.Api.v10
             .WithName(string.Format("/{0}/ListUserMailboxDetails", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
+            /// /v1.0/ListUserSigninLogs
+            /// </summary>
+            app.MapGet("/v{version:apiVersion}/ListUserSigninLogs", async (HttpContext context, HttpRequest request, string TenantFilter, string UserId) =>
+            {
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await ListUserSigninLogs(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
+            }).WithName(string.Format("/{0}/ListUserSigninLogs", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+
+            /// <summary>
             /// /v1.0/ListUsers
             /// </summary>
             app.MapGet("/v{version:apiVersion}/ListUsers", async (HttpContext context, HttpRequest request, string TenantFilter, string? UserId) =>
@@ -364,6 +391,16 @@ namespace CIPP_API_ALT.Api.v10
             }
 
             return await User.GetUserMailboxDetails(TenantFilter, UserId ?? string.Empty, accessingUser);
+        }
+
+        public static async Task<object> ListUserSigninLogs(HttpContext context, string TenantFilter, string UserId, string accessingUser)
+        {
+            if (!ApiEnvironment.CippCompatibilityMode)
+            {
+                CheckUserIsReader(context);
+            }
+
+            return await User.GetUserSigninLogs(TenantFilter, UserId ?? string.Empty, accessingUser);
         }
 
         public static async Task<object> ListUsers(HttpContext context, string TenantFilter, string UserId, string accessingUser)

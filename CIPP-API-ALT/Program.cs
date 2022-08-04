@@ -18,7 +18,7 @@ using ApiDev = CIPP_API_ALT.Api.v11;
 using Asp.Versioning.Builder;
 
 // Build Data/Cache directories if they don't exist
-ApiEnvironment.DataDirectoryBuild();
+ApiEnvironment.DataDirectoriesBuild();
 
 var builder = WebApplication.CreateBuilder(args);
 

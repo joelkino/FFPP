@@ -256,6 +256,33 @@ namespace CIPP_API_ALT.Api
             .WithName(string.Format("/{0}/ListUserMailboxDetails", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
 
             /// <summary>
+            /// /api/ListUserSigninLogs
+            /// </summary>
+            app.MapGet(string.Format("/{0}/ListUserSigninLogs", ApiEnvironment.ApiHeader), async (HttpContext context, HttpRequest request, string TenantFilter, string UserId) =>
+            {
+                string accessingUser = string.Empty;
+
+                if (ApiEnvironment.CippCompatibilityMode)
+                {
+                    accessingUser = await CippLogs.ReadSwaUser(request.Headers["x-ms-client-principal"]);
+                }
+                else
+                {
+                    //todo code to get user from JWT token provided in auth bearer
+                }
+
+                try
+                {
+                    return await CurrentApi.Routes.ListUserSigninLogs(context, TenantFilter, UserId ?? string.Empty, accessingUser);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
+            }).WithName(string.Format("/{0}/ListUserSigninLogs", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
+
+            /// <summary>
             /// /api/ListUsers
             /// </summary>
             app.MapGet(string.Format("/{0}/ListUsers", ApiEnvironment.ApiHeader), async (HttpContext context, HttpRequest request, string TenantFilter, string? UserId) =>
