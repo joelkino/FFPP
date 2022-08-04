@@ -229,9 +229,6 @@ if (ApiEnvironment.RunSwagger)
 //var salt = Utilities.Random2WordPhrase(24);
 //Sam.CreateSAMAuthApp("CIPP-API-ALT Auth", Sam.SamAppType.Api);
 //Sam.CreateSAMAuthApp("CIPP-API-ALT Swagger UI", Sam.SamAppType.Spa,spaRedirectUri: "https://localhost:7074/swagger/oauth2-redirect.html");
-
-List<Domain> domains = await Domain.GetDomains("", ApiEnvironment.Secrets.TenantId);
-
-var s = "";
+//List<Domain> domains = await Domain.GetDomains("", ApiEnvironment.Secrets.TenantId);
 
 app.Run();

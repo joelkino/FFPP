@@ -297,7 +297,7 @@ namespace CIPP_API_ALT.Api.v10.Users
 
             Task<List<JsonElement>> casResponseTask = RequestHelper.NewGraphGetRequest(string.Format("https://outlook.office365.com/adminapi/beta/{0}/CasMailbox('{1}')", tenantFilter, userId), tenantFilter, "exchangeonline", noPagination: true);
             List<JsonElement> mailResponse = await RequestHelper.NewGraphGetRequest(string.Format("https://outlook.office365.com/adminapi/beta/{0}/Mailbox('{1}')", tenantFilter, userId), tenantFilter, "exchangeonline", noPagination: true);
-            string email = mailResponse[0].GetProperty("PrimarySmtpAddress").GetString();
+            string email = mailResponse[0].GetProperty("PrimarySmtpAddress").GetString() ?? string.Empty;
             Task<JsonElement> mailboxDetailedRequest = RequestHelper.NewExoRequest(tenantFilter, "Get-Mailbox", JsonSerializer.Deserialize<JsonElement>(@"{""anr"":""" + email + @"""}"));
             Task<JsonElement> blockedSender = RequestHelper.NewExoRequest(tenantFilter, "Get-BlockedSenderAddress", JsonSerializer.Deserialize<JsonElement>(@"{""SenderAddress"":""" + email + @"""}"));
 
@@ -374,6 +374,13 @@ namespace CIPP_API_ALT.Api.v10.Users
             };
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tenantFilter"></param>
+        /// <param name="userId"></param>
+        /// <param name="accessingUser"></param>
+        /// <returns></returns>
         public static async Task<List<UserSigninLog>> GetUserSigninLogs(string tenantFilter, string userId, string accessingUser)
         {
             List<UserSigninLog> outLogs = new();
@@ -426,6 +433,31 @@ namespace CIPP_API_ALT.Api.v10.Users
             }
 
             return outLogs;
+        }
+
+        public static async Task<List<UserGroup>> GetUserGroups(string tenantFilter, string userId, string accessingUser)
+        {
+            using (CippLogs logsDb = new())
+            {
+                await logsDb.LogRequest("Accessed this API", accessingUser, "Debug", "", "ListUserGroups");
+            }
+
+            List<JsonElement> rawGroups = await RequestHelper.NewGraphGetRequest(
+                string.Format("https://graph.microsoft.com/beta/users/{0}/memberOf/$/microsoft.graph.group?$select=id,displayName,mailEnabled,securityEnabled,groupTypes,onPremisesSyncEnabled,mail,isAssignableToRole&$orderby=displayName asc", userId), tenantFilter, noPagination: true);
+            List<UserGroup>  groups = Utilities.ParseJson<UserGroup>(rawGroups);
+            return groups;
+        }
+
+        public struct UserGroup
+        {
+            public string? id { get; set; }
+            public string? DisplayName { get; set; }
+            public bool? MailEnabled { get; set; }
+            public string? Mail { get; set; }
+            public bool? SecurityGroup { get; set; }
+            public string[]? GroupTypes { get; set; }
+            public bool? OnPremisesSync { get; set; }
+            public bool? IsAssignableToRole { get; set; }
         }
 
         public struct UserSigninLog
