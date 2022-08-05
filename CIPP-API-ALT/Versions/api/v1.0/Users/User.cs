@@ -553,8 +553,7 @@ namespace CIPP_API_ALT.Api.v10.Users
             public string? DisplayName { get; set; }
             public bool? MailEnabled { get; set; }
             public string? Mail { get; set; }
-            public bool? SecurityGroup { get { return SecurityEnabled; } }
-            private bool? SecurityEnabled { get; set; }
+            public bool? SecurityEnabled { get; set; }
             public string[]? GroupTypes { get; set; }
             public bool? OnPremisesSync { get; set; }
             public bool? IsAssignableToRole { get; set; }
