@@ -62,6 +62,7 @@ if (!ApiZeroConfiguration.ZeroConfExists())
 {
     await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
 }
+builder.WebHost.UseUrls();
 
 // Read ZeroConf and load it into app config
 ApiZeroConfiguration zeroConf = Utilities.ReadJsonFromFile<ApiZeroConfiguration>(ApiEnvironment.ZeroConfPath);
