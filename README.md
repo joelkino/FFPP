@@ -46,13 +46,13 @@ This project utilises the official dotnet core method of creating secrets for ou
 
 Open **cmd/terminal** and navigate (`cd`) to the folder that contains the project file (CIPP-API-ALT.csproj). If you cloned the repository to your home directory this will be `cd ~/CIPP-API-ALT/CIPP-API-ALT` .
 
-Run the command `dotnet user-secrets init` and this will create a project specific secrets container identified by a GUID for us at the following locations:
+A project specific secrets container identified by a GUID will exist at the following locations after we add our first secret:
 
 - Windows: `%APPDATA%\Microsoft\UserSecrets\`
 
 - macOS/Linux: `~/.microsoft/usersecrets/`
 
-Now that our project secrets container has been made, it is time for us to populate it with secrets. To stash secrets in the project secret container, when we are in the project folder with **cmd/terminal**, we run `dotnet user-secrets set "[secret_name]" "[value]"`. An example of saving the TenantId secret would be `dotnet user-secrets set "TenantId" "goatfloater.onmicrosoft.com"`. We can repeat this step for all the secrets listed below.
+To add secrets in the project secret container, when we are in the project folder with **cmd/terminal**, we run `dotnet user-secrets set "[secret_name]" "[value]"`. An example of saving the TenantId secret would be `dotnet user-secrets set "TenantId" "goatfloater.onmicrosoft.com"`. We can repeat this step for all the secrets listed below.
 
 We must be sure to stash the following secrets in our secrets cache (**CASE SENSITIVE**):
 
