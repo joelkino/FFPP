@@ -1,10 +1,12 @@
 # This is Proof of Concept (PoC) code not for production use! (Yet)
 
-## Overview
+## FFPP Overview
 
 This is a C# ASP.NET Core web API minimal port of the awesome [CIPP-API](https://github.com/KelvinTegelaar/CIPP-API) project which is currently developed in PowerShell, and deployed as an Azure Function app.
 
-The main goal of this project is to speed up CIPP by utilising a web API version of CIPP-API instead of Azure Functions (no more error 500), with a secondary goal of decoupling CIPP-API from the requirement to use Azure Functions/Azure Storage etc. Initially we will retain the use of Azure Key Vault for our secrets in production, however in the future I expect to provide some alternative options as well, such as using a local TPM/fTPM, device keychain, or other mechanisms to keep secrets on-prem.
+It also contains a UI to consume the API wrote in HTML/SCSS/JS (Bootstrap) and the UI aims to be light weight and easier to maintain than the existing React based CIPP UI.
+
+The main goal of this project is to speed up CIPP by utilising a Web API minimal version of CIPP-API instead of Azure Functions (no more error 500), with a secondary goal of decoupling CIPP-API from the requirement to use Azure Functions/Azure Storage etc. Initially we will retain the use of Azure Key Vault for our secrets in production, however in the future I expect to provide some alternative options as well, such as using a local TPM/fTPM, device keychain, or other mechanisms to keep secrets on-prem.
 
 This port is designed/targeted for small Linux devices/servers, however being dotnet core you should be able to run it anywhere (in theory at least).
 
