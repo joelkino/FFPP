@@ -1,0 +1,2 @@
+dotnet ef database update --context FfppLogs
+dotnet ef database update --context ExcludedTenants

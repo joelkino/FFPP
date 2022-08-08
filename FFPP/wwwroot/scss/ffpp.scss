@@ -1,0 +1,78 @@
+@import "./bootstrap.scss";
+
+$ffpp-bg-deep-dark: $black;
+$ffpp-bg-dark: #303030;
+$ffpp-highlight-dark: #ffd017;
+$ffpp-bg-sidebar-dark: #212121;
+$ffpp-bg-modal-dark: #141414;
+$ffpp-color-dark: #ffffff;
+$ffpp-cadbury: #7d0dfd;
+
+nav {
+    background-color: $ffpp-bg-deep-dark;
+}
+
+body {
+    background-color: $ffpp-bg-dark;
+}
+
+.icon-highlight-dark {
+    color: $ffpp-highlight-dark;
+}
+
+.no-border-radius {
+    border-radius: 0rem;
+}
+
+.defy-justify-right {
+    margin-left: auto;
+}
+
+.onclick-no-blue {
+    &:active {
+        background-color: $ffpp-cadbury;
+        outline: none;
+    }
+}
+
+.window-max75-scroll {
+    max-height: 75vh;
+    overflow-y: scroll;
+  }
+
+.modal-bg-dark {
+    background-color: $ffpp-bg-modal-dark;
+}
+
+.color-dark {
+    color: $ffpp-color-dark;
+}
+
+.bg-border-dark {
+    border-color: $ffpp-bg-deep-dark;
+    background-color: $ffpp-bg-deep-dark;
+}
+
+.btn-switcher {
+    @extend .bg-border-dark;
+    &:hover,&:not(:hover) {
+        @extend .bg-border-dark;
+    }
+}
+
+.form-control-nav {
+    max-width: 200px;
+}
+
+.nav-mascott {
+    width: 30px;
+    height: 30px;
+}
+
+#sidebar-nav {
+    width: 200px;
+}
+
+#header {
+    height: 120px;
+}

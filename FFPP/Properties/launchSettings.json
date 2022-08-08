@@ -1,0 +1,19 @@
+﻿{
+  // These settings are used when we run the project in Visual Studio,
+  // these settings conviniently open Swagger and are not used in production
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "FFPP": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7074;http://localhost:7073",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+
+
