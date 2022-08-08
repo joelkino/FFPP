@@ -615,20 +615,6 @@ namespace CIPP_API_ALT.Api.v10.Users
 
         public struct OneDriveSiteReport
         {
-            public OneDriveSiteReport()
-            {
-                ReportRefreshDate = string.Empty;
-                URL = string.Empty;
-                displayName = string.Empty;
-                IsDeleted = string.Empty;
-                LastActive = string.Empty;
-                FileCount = string.Empty;
-                ActiveFileCount = string.Empty;
-                UsedGB = string.Empty;
-                Allocated = string.Empty;
-                UPN = string.Empty;
-                ReportPeriod = string.Empty;
-            }
             public OneDriveSiteReport(string reportRefreshDate, string siteUrl, string ownerDisplayName, string isDeleted, string lastActivityDate, string fileCount, string activeFileCount, string storageUsedBytes, string storageAllocatedBytes, string ownerPrincipalName, string reportPeriod)
             {
                 ReportRefreshDate = reportRefreshDate;

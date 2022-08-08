@@ -270,6 +270,18 @@ namespace CIPP_API_ALT.Common
 
             return new(phrase.Remove(0,1), salt, iterations, ignoreCryptoSafe);
         }
+
+        public static async Task<string> UsernameParse(HttpContext context)
+        {
+            try
+            {
+                return context.User.Claims.First(x => x.Type.ToLower().Equals("preferred_username")).Value;
+            }
+            catch
+            {
+                return "Illegal Alien";
+            }
+        }
     }
 }
 

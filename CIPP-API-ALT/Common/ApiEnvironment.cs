@@ -33,8 +33,9 @@ namespace CIPP_API_ALT.Common
         public static readonly string ApiVersionFile = WorkingDir + "/version_latest.txt";
         public static readonly string ApiHeader = "api";
         public static readonly string ApiAccessScope = "cipp-api-alt.access";
+        public static readonly string FfppSimulatedAuthUsername = "FFPP Simulated Authentication";
         public static List<double> ApiRouteVersions = new(){1.0};
-        public static ApiVersionSet ApiVersionSet { get; set; }
+        public static ApiVersionSet? ApiVersionSet { get; set; }
         public static readonly ApiVersion ApiDev = new(1.1);
         public static readonly ApiVersion ApiV10 = new(ApiRouteVersions[0]);
         public static readonly ApiVersion ApiV11 = ApiDev;
@@ -42,7 +43,7 @@ namespace CIPP_API_ALT.Common
         public static readonly string RemoteCippAltApiVersion = "https://raw.githubusercontent.com/White-Knight-IT/CIPP-API-ALT/main/CIPP-API-ALT/version_latest.txt";
         public static readonly string RemoteCippVersion = "https://raw.githubusercontent.com/KelvinTegelaar/CIPP/master/version_latest.txt";
         public static readonly DateTime Started = DateTime.UtcNow;
-        public static bool CippCompatibilityMode = false;
+        public static bool SimulateAuthenticated = false;
         public static bool ShowDevEnvEndpoints = false;
         public static bool ShowSwaggerUi = false;
         public static bool RunSwagger = false;

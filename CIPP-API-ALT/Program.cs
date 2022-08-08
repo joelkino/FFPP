@@ -27,9 +27,8 @@ ApiEnvironment.UseHttpsRedirect = builder.Configuration.GetValue<bool>("ApiSetti
 ApiEnvironment.ShowDevEnvEndpoints = builder.Configuration.GetValue<bool>("ApiSettings:ShowDevEndpoints");
 ApiEnvironment.ShowSwaggerUi = builder.Configuration.GetValue<bool>("ApiSettings:ShowSwaggerUi");
 ApiEnvironment.RunSwagger = builder.Configuration.GetValue<bool>("ApiSettings:RunSwagger");
-ApiEnvironment.CippCompatibilityMode = builder.Configuration.GetValue<bool>("ApiSettings:CippUiCampatibility");
 
-// Expose development environment API endpoints if set in settiungs to do so
+// Expose development environment API endpoints if set in settings to do so
 if (ApiEnvironment.ShowDevEnvEndpoints)
 {
     ApiEnvironment.ApiRouteVersions.Add(double.Parse(ApiEnvironment.ApiDev.ToString()));
@@ -62,6 +61,7 @@ if (!ApiZeroConfiguration.ZeroConfExists())
 {
     await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
 }
+
 builder.WebHost.UseUrls();
 
 // Read ZeroConf and load it into app config

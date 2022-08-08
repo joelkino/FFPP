@@ -83,20 +83,6 @@ namespace CIPP_API_ALT.Data.Logging
 
             return false;
         }
-
-        public async static Task<string> ReadSwaUser(string user)
-        {
-            string username = string.Empty;
-
-            if (!string.IsNullOrEmpty(user))
-            {
-                // Decoding user from the x-ms-s-client-principal header value passed in
-                JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(Convert.FromBase64String(user)));
-                username = jsonDoc.RootElement.EnumerateObject().FirstOrDefault(p => p.Name == "userDetails").Value.ToString();
-            }
-
-            return username;
-        }
         #endregion
 
         #region Private Methods
