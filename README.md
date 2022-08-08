@@ -40,13 +40,13 @@ If you are on Windows make sure you have [git installed](https://git-scm.com/dow
 
 On any platform, open **cmd/terminal** and navigate (`cd`) to where you want to download this project.
 
-Run the command `git clone git@github.com:White-Knight-IT/CIPP-API-ALT.git` and it will download this project into a folder named CIPP-API-ALT.
+Run the command `git clone git@github.com:White-Knight-IT/FFPP.git` and it will download this project into a folder named FFPP.
 
 ### Secrets
 
 This project utilises the official dotnet core method of creating secrets for our local devenv, that is using the [user-secrets](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-6.0&tabs=linux) tool. This puts our secrets in a location outside of the repository, so it is impossible for us to accidentally commit local secrets into the project.
 
-Open **cmd/terminal** and navigate (`cd`) to the folder that contains the project file (CIPP-API-ALT.csproj). If you cloned the repository to your home directory this will be `cd ~/CIPP-API-ALT/CIPP-API-ALT` .
+Open **cmd/terminal** and navigate (`cd`) to the folder that contains the project file (CIPP-API-ALT.csproj). If you cloned the repository to your home directory this will be `cd ~/FFPP/FFPP` .
 
 A project specific secrets container identified by a GUID will exist at the following locations after we add our first secret:
 
@@ -80,7 +80,7 @@ Now that the tools are installed, we need to instruct ef to create our databases
 ```
 Build started...
 Build succeeded.
-Applying migration '20220710174729_InitialCreate_CippLogs'.
+Applying migration '20220710174729_InitialCreate_FfppLogs'.
 Done.
 ```
 
@@ -90,25 +90,11 @@ Now we repeat this procedure for the remaining databases such as `dotnet ef data
 
 ### Setting ports
 
-The ports that the project listens for HTTP/HTTPS requests can both be configured in the `/CIPP-API-ALT/CIPP-API-ALT/Properties/launchSettings.json` file. In this file you will see a configuration profile like so:
-```
-"profiles": {
-  "CIPP_API_ALT": {
-    "commandName": "Project",
-    "dotnetRunMessages": true,
-    "launchBrowser": true,
-    "launchUrl": "swagger",
-    "applicationUrl": "https://localhost:7072;http://localhost:7071",
-    "environmentVariables": {
-      "ASPNETCORE_ENVIRONMENT": "Development"
-    }
-  },
-```
-In the above profile we can see the ports 7072 and 7071 being used for HTTPS and HTTP respectively. Feel free to change these, however using CIPP-API-ALT as a drop-in API replacement for CIPP-API in a dev environment requires using HTTP on port 7071. **DO NOT USE HTTP IN PRODUCTION**.
+The ports that the project listens for HTTP/HTTPS requests can both be configured in the `/FFPP/FFPP/appsettings.json` file. 
 
 ### Running the project
 
-Now that we have stashed our secrets and created our databases, we are free to run the project in our IDE. Open `/CIPP-API-ALT/CIPP-API-ALT.sln` in Visual Studio for example, ensure `Debug` is selected top left and **NOT** `Release` (to get the Swagger UI you must run in DEBUG mode), then hit the play `▶️` button.
+Now that we have stashed our secrets and created our databases, we are free to run the project in our IDE. Open `/FFPP/FFPP.sln` in Visual Studio for example, ensure `Debug` is selected top left and **NOT** `Release` (to get the Swagger UI you must run in DEBUG mode), then hit the play `▶️` button.
 
 Given that this is a web API, it is not expected to have a user interface when it runs in production. For development however, we are utilising the tool [Swagger](https://swagger.io/) which provides both automated documentaion of our API, and a user interface that lets us perform the RESTful API HTTP methods against our API routes from the browser.
 
