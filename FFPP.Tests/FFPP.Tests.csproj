@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>CIPP_API_ALT.Tests</RootNamespace>
+    <RootNamespace>FFPP.Tests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CIPP-API-ALT\CIPP-API-ALT.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="AssertionData\" />
     <None Remove="Versions\" />
     <None Remove="Versions\v1.0\" />
@@ -36,5 +32,8 @@
     <Folder Include="AssertionData\" />
     <Folder Include="Versions\" />
     <Folder Include="Versions\v1.0\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FFPP\FFPP.csproj" />
   </ItemGroup>
 </Project>
