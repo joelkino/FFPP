@@ -8,7 +8,7 @@ async function SignIn() {
     }
 
     let tokenResponse = await myMsal.acquireTokenSilent(tokenRequest);
-    console.log("Token Response: ", tokenResponse);
+    //console.log("Token Response: ", tokenResponse);
 
     return tokenResponse;
   }
@@ -29,7 +29,7 @@ async function SignIn() {
       accountId = response.account.homeAccountId;
       account = response.account;
       // Display signed-in user content, call API, etc.
-      console.log("Response not null so use it to fetch token");
+      //console.log("Response not null so use it to fetch token");
       var token = await FetchToken(response.account, myMsal);
       accessToken = token.accessToken;
     }
@@ -56,7 +56,7 @@ async function SignIn() {
       }
       else if (currentAccounts.length === 1)
       {
-        console.log("Single account");
+        //console.log("Single account");
         accountId = currentAccounts[0].homeAccountId;
         account = currentAccounts[0];
         var token = await FetchToken(account, myMsal);

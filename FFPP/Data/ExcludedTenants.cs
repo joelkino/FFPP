@@ -28,21 +28,13 @@ namespace FFPP.Data
         {
             try
             {
-                string username = string.Empty;
 
-                if (!string.IsNullOrEmpty(user))
+                if (string.IsNullOrEmpty(user))
                 {
-                    // Decoding user from the x-ms-s-client-principal header value passed in as a string
-                    JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(Convert.FromBase64String(user)));
-                    username = jsonDoc.RootElement.EnumerateObject().FirstOrDefault(p => p.Name == "userDetails").ToString();
+                    user = "CIPP";
                 }
 
-                if (string.IsNullOrEmpty(username))
-                {
-                    username = "CIPP";
-                }
-
-                WriteExcludedTenant(new ExcludedTenant { TenantDefaultDomain = tenantDefaultDomain, Username = username, DateString = DateTime.Now.ToString("dd-MM-yyyy") });
+                WriteExcludedTenant(new ExcludedTenant { TenantDefaultDomain = tenantDefaultDomain, Username = user, DateString = DateTime.Now.ToString("dd-MM-yyyy") });
             }
             catch (Exception ex)
             {
@@ -55,9 +47,9 @@ namespace FFPP.Data
         /// All of the tenants we have excluded
         /// </summary>
         /// <returns>List of ExcludedTenant objects</returns>
-        public List<ExcludedTenant> GetExcludedTenants()
+        public async Task<List<ExcludedTenant>> GetExcludedTenants()
         {
-            return _excludedTenantEntries.ToList() ?? new();
+            return await _excludedTenantEntries.ToListAsync() ?? new();
         }
 
         /// <summary>
@@ -65,9 +57,9 @@ namespace FFPP.Data
         /// </summary>
         /// <param name="defaultDomainName">defaultDomainName to check</param>
         /// <returns>bool which indicates if defaultDomainName is in ExcludedTenants DB</returns>
-        public bool IsExcluded(string defaultDomainName)
+        public async Task<bool> IsExcluded(string defaultDomainName)
         {
-            if (_excludedTenantEntries.Find(defaultDomainName) == null)
+            if (await _excludedTenantEntries.FindAsync(defaultDomainName) == null)
             {
                 return false;
             }
@@ -78,9 +70,9 @@ namespace FFPP.Data
 
         #region Private Methods
         // Writes an ExcludedTenant object to the ExcludedTenants DB
-        private void WriteExcludedTenant(ExcludedTenant excludedTenant)
+        private async void WriteExcludedTenant(ExcludedTenant excludedTenant)
         {
-            if (!IsExcluded(excludedTenant.TenantDefaultDomain))
+            if (! await IsExcluded(excludedTenant.TenantDefaultDomain))
             {
                 Add(excludedTenant);
                 SaveChanges();

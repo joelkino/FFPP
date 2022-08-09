@@ -2,6 +2,9 @@ async function Refresh()
 {
     document.getElementById('tenantsDropdownButton').disabled=true;
     document.getElementById('tenantData').innerHTML='';
+    const profile = await AuthMe();
+    console.warn(profile.clientPrincipal.photoData);
+    document.getElementById("profileDropdownButton").style="background-size: 100%; background-image: url(data:image/jpg;base64,"+profile.clientPrincipal.photoData+")";
     const tenantJson = await GetTenants(true);
 
     var dropItems="";

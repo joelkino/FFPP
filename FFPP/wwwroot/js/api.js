@@ -24,16 +24,22 @@ async function FetchUrl(url, method = "GET")
 }
 
 async function AuthMe() {
-   FetchUrl('/.auth/me').then( function(response)
-  {return response}).catch(function(error){console.error(error);});
+  try
+  {
+    return await FetchUrl('/.auth/me');
+  }
+  catch(error)
+  {
+    console.error(error);
+  }
+
 }
 
 async function GetTenants(allTenantSelector = false)
 {
   try
   {
-    var response = await FetchUrl(`/api/ListTenants?AllTenantSelector=${allTenantSelector}`);
-    return response;
+    return await FetchUrl(`/api/ListTenants?AllTenantSelector=${allTenantSelector}`);
   }
   catch(error)
   {

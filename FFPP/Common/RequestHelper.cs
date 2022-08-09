@@ -248,6 +248,7 @@ namespace FFPP.Common
 		/// <param name="tenantId">The tenant the request relates to</param>
 		/// <param name="scope"></param>
 		/// <param name="asApp">As application or as delegated user</param>
+		/// <param name="contentHeader">Set the content header for the type of data we want returned</param>
 		/// <returns>A string representing content returned in the response</returns>
 		public static async Task<string> NewGraphGetRequestString(string uri, string tenantId, string scope = "https://graph.microsoft.com//.default", bool asApp = false, string contentHeader="")
 		{
@@ -322,6 +323,90 @@ namespace FFPP.Common
 			}
 
 			return data;
+		}
+
+		/// <summary>
+		/// Sends a HTTP GET request to supplied uri using graph access_token for auth
+		/// </summary>
+		/// <param name="uri">The url we wish to GET from</param>
+		/// <param name="tenantId">The tenant the request relates to</param>
+		/// <param name="scope"></param>
+		/// <param name="asApp">As application or as delegated user</param>
+		/// <param name="contentHeader">Set the content header for the type of data we want returned</param>
+		/// <returns>A byte[] representing content returned in the response</returns>
+		public static async Task<byte[]>? NewGraphGetRequestBytes(string uri, string tenantId, string scope = "https://graph.microsoft.com//.default", bool asApp = false, string contentHeader = "")
+		{
+			List<byte> data=new();
+			Dictionary<string, string> headers;
+
+			if (scope.ToLower().Equals("exchangeonline"))
+			{
+				headers = await GetGraphToken(tenantId, asApp, "a0c73c16-a7e3-4564-9a95-2bdf47383716", ApiEnvironment.Secrets.ExchangeRefreshToken, "https://outlook.office365.com/.default");
+
+			}
+			else
+			{
+				headers = await GetGraphToken(tenantId, asApp, string.Empty, string.Empty, scope);
+			}
+
+			FfppLogs.DebugConsoleWrite(string.Format("Using {0} as url", uri));
+
+			if (await GetAuthorisedRequest(tenantId, uri))
+			{
+				try
+				{
+					using HttpRequestMessage requestMessage = new(HttpMethod.Get, uri);
+					{
+						requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", headers.GetValueOrDefault("Authorization", "FAILED-TO-GET-AUTH-TOKEN"));
+						requestMessage.Headers.TryAddWithoutValidation("ConsistencyLevel", "eventual");
+
+						if (string.IsNullOrEmpty(contentHeader))
+						{
+							requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(contentHeader);
+
+						}
+
+						foreach (KeyValuePair<string, string> _h in headers)
+						{
+							if (!_h.Key.ToLower().Equals("authorization"))
+							{
+								requestMessage.Headers.TryAddWithoutValidation(_h.Key, _h.Value);
+							}
+						}
+						HttpResponseMessage responseMessage = await SendHttpRequest(requestMessage);
+
+						if (responseMessage.IsSuccessStatusCode)
+						{
+
+							data.AddRange(await responseMessage.Content.ReadAsByteArrayAsync());
+
+						}
+						else
+						{
+							using (FfppLogs logDb = new())
+							{
+								// Write to log an error that we didn't get HTTP 2XX
+								await logDb.LogRequest(string.Format("Incorrect HTTP status code. Expected 2XX got {0}. Uri: {1}",
+									responseMessage.StatusCode.ToString(), uri), string.Empty, "Error", tenantId, "NewGraphGetRequest");
+							}
+						}
+					}
+				}
+				catch (Exception exception)
+				{
+					Console.WriteLine(string.Format("Exception in NewGraphGetRequest: {0}, Inner Exception: {1}", exception.Message, exception.InnerException.Message));
+					throw;
+				}
+			}
+			else
+			{
+				using (FfppLogs logDb = new())
+				{
+					await logDb.LogRequest("Not allowed. You cannot manage your own tenant or tenants not under your scope", string.Empty, "Info", tenantId, "NewGraphGetRequest");
+				}
+			}
+
+			return data.ToArray();
 		}
 
 		/// <summary>
@@ -845,7 +930,9 @@ namespace FFPP.Common
 				uri.ToLower().Contains("https://graph.microsoft.com/beta/tenantrelationships/managedtenants") ||
 				(uri.ToLower().Contains("https://graph.microsoft.com/v1.0/applications") && tenantId.Equals(ApiEnvironment.Secrets.TenantId)) ||
 				(uri.ToLower().Contains("https://graph.microsoft.com/beta/domains") && tenantId.Equals(ApiEnvironment.Secrets.TenantId)) ||
-				uri.ToLower().Contains("/photos/48x48/$value"))
+				uri.ToLower().Contains("/photos/48x48/$value") || uri.ToLower().Contains("/photos/120x120/$value") ||
+				uri.ToLower().Contains("/photos/240x240/$value") || uri.ToLower().Contains("/photos/432x432/$value") ||
+				uri.ToLower().Contains("/photos/648x648/$value"))
 			{
 				return true;
 			}

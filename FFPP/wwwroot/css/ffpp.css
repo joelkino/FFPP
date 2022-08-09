@@ -10766,6 +10766,28 @@ body {
   background-color: #303030;
 }
 
+.profile-button-img {
+  vertical-align: top;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  background-color: #141414;
+  border: none;
+}
+
+.user-profile-button {
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  background-color: #141414;
+  border: none;
+  text-align: center;
+}
+.user-profile-button:hover, .user-profile-button:not(:hover) {
+  background-color: #141414;
+  border: none;
+}
+
 .icon-highlight-dark {
   color: #ffd017;
 }

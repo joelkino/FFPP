@@ -231,6 +231,23 @@ namespace FFPP.Api.v10
             .WithName(string.Format("/{0}/ListUserMailboxDetails", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
+            /// /v1.0/ListUserPhoto
+            /// </summary>
+            app.MapGet("/v{version:apiVersion}/ListUserPhoto", async (HttpContext context, HttpRequest request, string TenantFilter, string UserId) =>
+            {
+                try
+                {
+                    return await ListUserPhoto(context, TenantFilter, UserId ?? string.Empty);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    context.Response.StatusCode = 401;
+                    return Results.Unauthorized();
+                }
+            })
+            .WithName(string.Format("/{0}/ListUserPhoto", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+
+            /// <summary>
             /// /v1.0/ListUserSigninLogs
             /// </summary>
             app.MapGet("/v{version:apiVersion}/ListUserSigninLogs", async (HttpContext context, HttpRequest request, string TenantFilter, string UserId) =>
@@ -302,9 +319,38 @@ namespace FFPP.Api.v10
 
             task.Start();
 
-            string photoData = await User.GetUserPhoto("9ae3cb8f-69f8-49d2-96c8-73f59ac051ef");
+            Auth authUserProfile =  await task;
 
-            return await task;
+            authUserProfile.clientPrincipal.photoData = await User.GetUserPhoto(authUserProfile.clientPrincipal.userId.ToString(), UserPhotoSize.Small, context.User.Claims.First(x => x.Type.ToLower().Contains("tenantid")).Value);
+
+            // Check if profile exists, update and use if it does, create and use if it doesn't
+
+            using (UserProfiles users = new())
+            {
+                UserProfiles.UserProfile userDbProfile = await users.GetUserProfile(authUserProfile.clientPrincipal.userId);
+
+                // User has no profile so we will create it
+               if (userDbProfile == null)
+               {
+                    authUserProfile.clientPrincipal.theme = "dark";
+                    authUserProfile.clientPrincipal.lastTenantName = "* All Tenants";
+                    authUserProfile.clientPrincipal.lastTenantDomainName = "AllTenants";
+                    authUserProfile.clientPrincipal.lastTenantCustomerId = "AllTenants";
+                    authUserProfile.clientPrincipal.defaultPageSize = 100;
+                    users.AddUserProfile(authUserProfile.clientPrincipal);
+                    return authUserProfile;
+               }
+
+                // User exists in the DB yay let us use it
+                authUserProfile.clientPrincipal.theme = userDbProfile.theme;
+                authUserProfile.clientPrincipal.lastTenantName = userDbProfile.lastTenantName;
+                authUserProfile.clientPrincipal.lastTenantDomainName = userDbProfile.lastTenantDomainName;
+                authUserProfile.clientPrincipal.lastTenantCustomerId = userDbProfile.lastTenantCustomerId;
+                authUserProfile.clientPrincipal.defaultPageSize = userDbProfile.defaultPageSize;
+                authUserProfile.clientPrincipal.defaultUseageLocation = userDbProfile.defaultUseageLocation;
+                await users.UpdateUserProfile(authUserProfile.clientPrincipal);
+                return authUserProfile;
+            }
         }
 
         public static async Task<object> GetDashboard(HttpContext context)
@@ -409,6 +455,16 @@ namespace FFPP.Api.v10
             }
 
             return await User.GetUserMailboxDetails(TenantFilter, UserId ?? string.Empty, accessingUser);
+        }
+
+        public static async Task<object> ListUserPhoto(HttpContext context, string TenantFilter, string UserId)
+        {
+            if (!ApiEnvironment.SimulateAuthenticated)
+            {
+                CheckUserIsReader(context);
+            }
+            UserPhotoSize size = UserPhotoSize.Small;
+            return await User.GetUserPhoto(UserId, size, TenantFilter);
         }
 
         public static async Task<object> ListUserSigninLogs(HttpContext context, string TenantFilter, string UserId)

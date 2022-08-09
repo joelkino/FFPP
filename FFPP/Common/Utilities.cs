@@ -162,7 +162,7 @@ namespace FFPP.Common
         }
 
         /// <summary>
-        /// Converts a base64url string into a byte array
+        /// Decodes a base64url string into a byte array
         /// </summary>
         /// <param name="arg">string to convert to bytes</param>
         /// <returns>byte[] containing decoded bytes</returns>
@@ -182,6 +182,16 @@ namespace FFPP.Common
                     throw new Exception(string.Format("Illegal base64url string: {0}", arg));
             }
             return Convert.FromBase64String(s); // Standard base64 decoder
+        }
+
+        /// <summary>
+        /// Encodes a byte array into a Base64 encoded string
+        /// </summary>
+        /// <param name="bytes">bytes to encode</param>
+        /// <returns>Base64 encoded string</returns>
+        public static string Base64Encode(byte[] bytes)
+        {
+            return Convert.ToBase64String(bytes);
         }
 
         /// <summary>

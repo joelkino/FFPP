@@ -16,6 +16,27 @@ body {
     background-color: $ffpp-bg-dark;
 }
 
+.profile-button-img {
+    vertical-align: top;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    background-color: $ffpp-bg-modal-dark;
+    border: none;
+}
+.user-profile-button {
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    background-color: $ffpp-bg-modal-dark;
+    border: none;
+    text-align: center;
+    &:hover,&:not(:hover) {
+        background-color: $ffpp-bg-modal-dark;
+        border: none;
+    }
+}
+
 .icon-highlight-dark {
     color: $ffpp-highlight-dark;
 }

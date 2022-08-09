@@ -68,7 +68,7 @@ namespace FFPP.Api.v10.Tenants
 
 
 						// If we want to exclude from ExcludedTenants from outTenants and it is in ExcludedTenants
-						if (exclude && excludedTenantsDb.IsExcluded(t.defaultDomainName))
+						if (exclude && excludedTenantsDb.IsExcluded(t.defaultDomainName).Result)
 						{
 							// We exclude
 							continue;
