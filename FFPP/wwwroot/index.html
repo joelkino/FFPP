@@ -7,15 +7,6 @@
     <!--<link href="../css/bootstrap-5.2.0.min.css" rel="stylesheet" integrity="sha384-5l1pBvzD8FdnYz/+bZKE4VpB3OChkHSyHoRsWAz8HvH02lkx7i491Mprjojst1oC" crossorigin="anonymous">-->
     <link href="../css/bootstrap-icons-1.9.1.css" rel="stylesheet" integrity="sha384-ESNUyFrMrvuws5P2b+K3oJYVXY8prUqwvpfNpRdM2V4Q4E1hbzw7rOSWeq/m8q6u" crossorigin="anonymous">
     <link href="../css/ffpp.css" rel="stylesheet" crossorigin="anonymous">
-    <script type="text/javascript">
-      // Global variables here
-      var tenantFilter='';
-
-      async function GetPayload() {
-            var payload = await FetchUrl('/.auth/me');
-            console.log(payload);
-        }
-    </script>
 </head>
   <body onload="SignIn()">
     <nav class="navbar sticky-top">
@@ -25,51 +16,13 @@
         </span>
         <button data-bs-target="#sidebar" data-bs-toggle="collapse" class="border rounded-3 p-1 text-decoration-none bg-border-dark color-dark border-0"><i class="bi bi-list bi-lg py-2 p-1"></i></button>
         <div id="tenantsDropdown" class="dropdown">
-          <button id = "tenantsDropdownButton" class="btn-switcher shadow-none btn btn-secondary ms-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="DropdownButtonClick('tenantsDropdown','tenantsSearch')">
-            <span id="tenantName">All Tenants</span><span id="tenantsFixedIcon">&nbsp;&nbsp;<i class="bi bi-arrow-left-right icon-highlight-dark"></i></span>
+          <button id="tenantsDropdownButton" class="btn-switcher shadow-none btn btn-secondary ms-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="DropdownButtonClick('tenantsDropdown','tenantsSearch')">
+            <span id="tenantName" data-tenant="AllTenants">All Tenants</span><span id="tenantsFixedIcon">&nbsp;&nbsp;<i class="bi bi-arrow-left-right icon-highlight-dark"></i></span>
           </button>
-          <ul class="window-max75-scroll dropdown-menu dropdown-menu-dark modal-bg-dark">
-            <input class="form-control shadow-none no-border-radius border-0" type="text" placeholder="Search.." id="tenantsSearch" onkeyup="DropdownFilterFunction('tenantsDropdown','tenantsSearch')">
-            <li><a class="onclick-no-blue dropdown-item modal-bg-dark" name="AllTenants" onclick="SelectOption('tenantName',this.innerText)">* All Tenants</a></li>
-            <li><a class="onclick-no-blue dropdown-item modal-bg-dark" name="contoso.com" onclick="SelectOption('tenantName',this.innerText)">Contoso</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="informationmanagement.com.au" onclick="SelectOption('tenantName',this.innerText)">Information Management Solutions</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="tailspintoys.com" onclick="SelectOption('tenantName',this.innerText)">Tailspin Toys</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="AllTenants" onclick="SelectOption('tenantName',this.innerText)">* All Tenants</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="contoso.com" onclick="SelectOption('tenantName',this.innerText)">Contoso</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="informationmanagement.com.au" onclick="SelectOption('tenantName',this.innerText)">Information Management Solutions</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="tailspintoys.com" onclick="SelectOption('tenantName',this.innerText)">Tailspin Toys</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="AllTenants" onclick="SelectOption('tenantName',this.innerText)">* All Tenants</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="contoso.com" onclick="SelectOption('tenantName',this.innerText)">Contoso</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="informationmanagement.com.au" onclick="SelectOption('tenantName',this.innerText)">Information Management Solutions</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="tailspintoys.com" onclick="SelectOption('tenantName',this.innerText)">Tailspin Toys</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="AllTenants" onclick="SelectOption('tenantName',this.innerText)">* All Tenants</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="contoso.com" onclick="SelectOption('tenantName',this.innerText)">Contoso</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="informationmanagement.com.au" onclick="SelectOption('tenantName',this.innerText)">Information Management Solutions</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="tailspintoys.com" onclick="SelectOption('tenantName',this.innerText)">Tailspin Toys</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="AllTenants" onclick="SelectOption('tenantName',this.innerText)">* All Tenants</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="contoso.com" onclick="SelectOption('tenantName',this.innerText)">Contoso</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="informationmanagement.com.au" onclick="SelectOption('tenantName',this.innerText)">Information Management Solutions</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="tailspintoys.com" onclick="SelectOption('tenantName',this.innerText)">Tailspin Toys</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="AllTenants" onclick="SelectOption('tenantName',this.innerText)">* All Tenants</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="contoso.com" onclick="SelectOption('tenantName',this.innerText)">Contoso</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="informationmanagement.com.au" onclick="SelectOption('tenantName',this.innerText)">Information Management Solutions</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="tailspintoys.com" onclick="SelectOption('tenantName',this.innerText)">Tailspin Toys</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="AllTenants" onclick="SelectOption('tenantName',this.innerText)">* All Tenants</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="contoso.com" onclick="SelectOption('tenantName',this.innerText)">Contoso</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="informationmanagement.com.au" onclick="SelectOption('tenantName',this.innerText)">Information Management Solutions</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="tailspintoys.com" onclick="SelectOption('tenantName',this.innerText)">Tailspin Toys</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="AllTenants" onclick="SelectOption('tenantName',this.innerText)">* All Tenants</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="contoso.com" onclick="SelectOption('tenantName',this.innerText)">Contoso</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="informationmanagement.com.au" onclick="SelectOption('tenantName',this.innerText)">Information Management Solutions</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="tailspintoys.com" onclick="SelectOption('tenantName',this.innerText)">Tailspin Toys</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="AllTenants" onclick="SelectOption('tenantName',this.innerText)">* All Tenants</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="contoso.com" onclick="SelectOption('tenantName',this.innerText)">Contoso</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="informationmanagement.com.au" onclick="SelectOption('tenantName',this.innerText)">Information Management Solutions</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="tailspintoys.com" onclick="SelectOption('tenantName',this.innerText)">Tailspin Toys</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="AllTenants" onclick="SelectOption('tenantName',this.innerText)">* All Tenants</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="contoso.com" onclick="SelectOption('tenantName',this.innerText)">Contoso</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="informationmanagement.com.au" onclick="SelectOption('tenantName',this.innerText)">Information Management Solutions</a></li>
-            <li><a class="dropdown-item modal-bg-dark" name="tailspintoys.com" onclick="SelectOption('tenantName',this.innerText)">Tailspin Toys</a></li>
+          <ul id="tenantList" class="window-max75-scroll dropdown-menu dropdown-menu-dark modal-bg-dark">
+            <input id="tenantsSearch" class="form-control shadow-none no-border-radius border-0" type="text" placeholder="Search.." onkeyup="DropdownFilterFunction('tenantsDropdown','tenantsSearch')">
+            <div id="tenantData">
+            </div>
           </ul>
         </div>
         <div id="profileDropdown" class="dropdown defy-justify-right">
@@ -120,7 +73,16 @@
       <script type="text/javascript" src="../js/msal-2.28.1.js" integrity="sha384-Zzg9dRpqVPwY3zdokPy29ZFaMIAvjiaP2YPsoDT9MI4Y+z4OajJk+q839V1oPRiY" crossorigin></script>
       <script type="text/javascript" src="../js/auth.js" integrity="sha384-IRCS3ImrskMleUU34my7w9oGNfzSnps+j3OIKywtoT9fdrln4L6ks0K7tc8gmbwK" crossorigin></script>
       <script type="text/javascript" src="../js/bootstrap-5.2.0.bundle.min.js" integrity="sha384-DLUO5IuVYJRWQsIyaqxfLbQiZr8+JNMVqcyEJbpMIV9jVCyIVgXLBz6YL3Zcveds" crossorigin></script>
-      <script type="text/javascript" src="../js/searchable-dropdown.js" crossorigin></script>
       <script type="text/javascript" src="../js/api.js" crossorigin></script>
+      <script type="text/javascript" src="../js/app.js" crossorigin></script>
+      <script type="text/javascript">
+        // Global variables here
+        var tenantFilter='';
+        Refresh();
+        //async function GetPayload() {
+              //var payload = await FetchUrl('/.auth/me')
+              //console.log(payload);
+          //}
+      </script>
   </body>
 </html>

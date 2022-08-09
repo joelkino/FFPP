@@ -55,8 +55,8 @@ namespace FFPP.Api.v10.Tenants
                     listTenants.Add(new Tenant()
 					{
 						customerId= "AllTenants",
-						defaultDomainName = "*All Tenants",
-						displayName = "AllTenants"
+						defaultDomainName = "AllTenants",
+						displayName = "* All Tenants"
 					});
                 }
 

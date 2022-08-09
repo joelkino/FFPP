@@ -3,15 +3,15 @@ by the client. */
 
 const config = {
   auth: {
-    clientId: '064e4ec3-5dcd-410e-959c-2bfd3e47c0d5',
+    clientId: '9740fb35-7c94-4386-940e-56587f0172d5',
     authority: 'https://login.microsoftonline.com/organizations/',
-    redirectUri: '/home/index.html'
+    redirectUri: '/index.html'
   },
   cache: {
     cacheLocation: 'sessionStorage',
     storeAuthStateInCookie: false
   },
   api: {
-    scopes: ['https://whiteknightit.onmicrosoft.com/df80cb54-6ed0-4c6b-9a31-a3e038232451/cipp-api-alt.access']
+    scopes: ['https://whiteknightit.onmicrosoft.com/ca6a657e-7317-447d-99a9-b36ec9a40cfa/ffpp-api.access']
   }
 };

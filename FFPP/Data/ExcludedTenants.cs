@@ -39,14 +39,14 @@ namespace FFPP.Data
 
                 if (string.IsNullOrEmpty(username))
                 {
-                    username = "FFPP";
+                    username = "CIPP";
                 }
 
                 WriteExcludedTenant(new ExcludedTenant { TenantDefaultDomain = tenantDefaultDomain, Username = username, DateString = DateTime.Now.ToString("dd-MM-yyyy") });
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception writing  in FfppLogs: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message ?? string.Empty);
+                Console.WriteLine("Exception writing  in CippLogs: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message ?? string.Empty);
                 throw;
             }
         }
@@ -57,7 +57,7 @@ namespace FFPP.Data
         /// <returns>List of ExcludedTenant objects</returns>
         public List<ExcludedTenant> GetExcludedTenants()
         {
-           return _excludedTenantEntries.ToList() ?? new();
+            return _excludedTenantEntries.ToList() ?? new();
         }
 
         /// <summary>
@@ -80,8 +80,8 @@ namespace FFPP.Data
         // Writes an ExcludedTenant object to the ExcludedTenants DB
         private void WriteExcludedTenant(ExcludedTenant excludedTenant)
         {
-            if(!IsExcluded(excludedTenant.TenantDefaultDomain))
-            { 
+            if (!IsExcluded(excludedTenant.TenantDefaultDomain))
+            {
                 Add(excludedTenant);
                 SaveChanges();
             }

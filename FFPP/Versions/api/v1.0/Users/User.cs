@@ -527,6 +527,11 @@ namespace FFPP.Api.v10.Users
             return userDevices;
         }
 
+        public static async Task<string> GetUserPhoto(string userId)
+        {
+            return await RequestHelper.NewGraphGetRequestString(string.Format("https://graph.microsoft.com/v1.0/users/{0}/photos/128x128/$value",userId),ApiEnvironment.Secrets.TenantId,contentHeader: "image/jpg");
+        }
+
         public struct UserDevice
         {
             public string? ID { get; set; }

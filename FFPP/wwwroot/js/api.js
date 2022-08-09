@@ -23,7 +23,21 @@ async function FetchUrl(url, method = "GET")
   }
 }
 
+async function AuthMe() {
+   FetchUrl('/.auth/me').then( function(response)
+  {return response}).catch(function(error){console.error(error);});
+}
+
 async function GetTenants(allTenantSelector = false)
 {
+  try
+  {
+    var response = await FetchUrl(`/api/ListTenants?AllTenantSelector=${allTenantSelector}`);
+    return response;
+  }
+  catch(error)
+  {
+    console.error(error);
+  }
 
 }

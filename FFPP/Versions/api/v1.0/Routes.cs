@@ -1,6 +1,7 @@
 ﻿using Microsoft.Identity.Web.Resource;
 using System.Security.Claims;
 using FFPP.Common;
+using FFPP.Data;
 using FFPP.Api.v10.Dashboards;
 using FFPP.Api.v10.Users;
 using FFPP.Api.v10.Tenants;
@@ -284,8 +285,8 @@ namespace FFPP.Api.v10
                     {
                         clientPrincipal = new()
                         {
+                            userId = Guid.Parse(context.User.Claims.First(x => x.Type.ToLower().Equals("http://schemas.microsoft.com/identity/claims/objectidentifier")).Value),
                             identityProvider = "aad",
-                            userId = context.User.Claims.First(x => x.Type.ToLower().Equals("http://schemas.microsoft.com/identity/claims/objectidentifier")).Value,
                             name = context.User.Claims.First(x => x.Type.ToLower().Equals("name")).Value,
                             userDetails = context.User.Claims.First(x => x.Type.ToLower().Equals("preferred_username")).Value,
                             userRoles = roles
@@ -300,6 +301,8 @@ namespace FFPP.Api.v10
             });
 
             task.Start();
+
+            string photoData = await User.GetUserPhoto("9ae3cb8f-69f8-49d2-96c8-73f59ac051ef");
 
             return await task;
         }
@@ -484,18 +487,10 @@ namespace FFPP.Api.v10
         /// </summary>
         public struct Auth
         {
-            public ClientPrincipal clientPrincipal { get; set; }
+            public UserProfiles.UserProfile clientPrincipal { get; set; }
         }
 
-        public struct ClientPrincipal
-        {
-        
-            public string? identityProvider { get; set; }
-            public string? userId { get; set; }
-            public string? name { get; set; }
-            public string? userDetails { get; set; }
-            public List<string>? userRoles { get; set; }
-        }
+
 
         /// <summary>
         /// Defines a Heartbeat object we return when the /api/Heartbeat API is polled

@@ -249,7 +249,7 @@ namespace FFPP.Common
 		/// <param name="scope"></param>
 		/// <param name="asApp">As application or as delegated user</param>
 		/// <returns>A string representing content returned in the response</returns>
-		public static async Task<string> NewGraphGetRequestString(string uri, string tenantId, string scope = "https://graph.microsoft.com//.default", bool asApp = false)
+		public static async Task<string> NewGraphGetRequestString(string uri, string tenantId, string scope = "https://graph.microsoft.com//.default", bool asApp = false, string contentHeader="")
 		{
 			string data = string.Empty;
 			Dictionary<string, string> headers;
@@ -274,6 +274,12 @@ namespace FFPP.Common
 					{
 						requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", headers.GetValueOrDefault("Authorization", "FAILED-TO-GET-AUTH-TOKEN"));
 						requestMessage.Headers.TryAddWithoutValidation("ConsistencyLevel", "eventual");
+
+						if(string.IsNullOrEmpty(contentHeader))
+                        {
+							requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(contentHeader);
+
+						}
 
 						foreach (KeyValuePair<string, string> _h in headers)
 						{
@@ -836,7 +842,10 @@ namespace FFPP.Common
 
 			if (uri.ToLower().Contains("https://graph.microsoft.com/beta/contracts") || uri.ToLower().Contains("/customers/") ||
 				uri.ToLower().Equals("https://graph.microsoft.com/v1.0/me/sendmail") ||
-				uri.ToLower().Contains("https://graph.microsoft.com/beta/tenantrelationships/managedtenants") || (uri.ToLower().Contains("https://graph.microsoft.com/v1.0/applications") && tenantId.Equals(ApiEnvironment.Secrets.TenantId)) || (uri.ToLower().Contains("https://graph.microsoft.com/beta/domains") && tenantId.Equals(ApiEnvironment.Secrets.TenantId)))
+				uri.ToLower().Contains("https://graph.microsoft.com/beta/tenantrelationships/managedtenants") ||
+				(uri.ToLower().Contains("https://graph.microsoft.com/v1.0/applications") && tenantId.Equals(ApiEnvironment.Secrets.TenantId)) ||
+				(uri.ToLower().Contains("https://graph.microsoft.com/beta/domains") && tenantId.Equals(ApiEnvironment.Secrets.TenantId)) ||
+				uri.ToLower().Contains("/photos/48x48/$value"))
 			{
 				return true;
 			}
