@@ -1,2 +1,0 @@
-dotnet ef database update --context CippLogs
-dotnet ef database update --context ExcludedTenants
